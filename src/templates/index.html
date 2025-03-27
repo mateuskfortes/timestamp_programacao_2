@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>timestamp</title>
+</head>
+<body>
+    <h1>Timestamp</h1>
+    <form id="form">
+        <div>
+            <label for="data-input">Data em unix ou utc: </label>
+            <input id="data-input" type="text">
+        </div>
+        <div>
+            <label for="timezone-input">Diga o timezone: </label>
+            <input id="timezone-input" type="text" placeholder="UTC">
+        </div>
+        <button type="submit">Enviar</button>
+    </form>
+</body>
+<script>
+    const form = document.getElementById('form')
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault()
+
+        const dataInput = document.getElementById('data-input').value;
+        const timezoneInput = document.getElementById('timezone-input').value;
+
+        // Criar o parâmetro para a query string
+        const params = new URLSearchParams();
+        params.append('timezone', timezoneInput || 'UTC');
+
+        const response = await fetch(`api/${dataInput || ""}?` + params.toString(), {
+            method: 'GET',
+        })
+        const data = await response.json()
+        alert(data.utc + "  ,,,,,,,,," + data.unix + " ,,,,,,   " + data.formatedTime)
+    })
+</script>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "timestamp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "jest",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [],
+  "author": "Mateus Fortes",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "moment": "^2.30.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
