@@ -4,26 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>timestamp</title>
+    <style>
+        body {
+            display: flex;
+        }
+        body > section {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Timestamp</h1>
-    <form id="form">
-        <div>
-            <label for="data-input">Data em unix ou utc: </label>
-            <input id="data-input" type="text">
-        </div>
-        <div>
-            <label for="timezone-input">Diga o timezone: </label>
-            <input id="timezone-input" type="text" placeholder="UTC">
-        </div>
-        <button type="submit">Enviar</button>
-    </form>
+    <section>
+        <h1>Timestamp</h1>
+        <form id="form">
+            <div>
+                <label for="data-input">Data em unix ou utc: </label>
+                <input id="data-input" type="text">
+            </div>
+            <div>
+                <label for="timezone-input">Diga o timezone: </label>
+                <input id="timezone-input" type="text" placeholder="UTC">
+            </div>
+            <button type="submit">Enviar</button>
+        </form>
+        <section>
+            <h2>HORAS</h2>
+            <p>UTC: <span id="utc-span"></span></p>
+            <p>UNIX: <span id="unix-span"></span></p>
+            <p>Com timezone: <span id="formatted-time-span"></span></p>
+        </section>
+    </section>
+    <section>
+        <h1>Diferença entre datas</h1>
+        <form id="diff-form">
+            <div>
+                <label for="data1">primeira data: </label>
+                <input id="data1" type="text">
+            </div>
+            <div>
+                <label for="data2">segunda data: </label>
+                <input id="data2" type="text">
+            </div>
+            <button type="submit">comparar</button>
+        </form>
+        <section>
+            <h2>Resultado da Diferença:</h2>
+            <p>Anos: <span id="years-span"></span></p>
+            <p>Meses: <span id="months-span"></span></p>
+            <p>Dias: <span id="days-span"></span></p>
+            <p>Horas: <span id="hours-span"></span></p>
+            <p>Minutos: <span id="minutes-span"></span></p>
+            <p>Segundos: <span id="seconds-span"></span></p>
+            <p>Milissegundos: <span id="milliseconds-span"></span></p>
+        </section>
+    </section>
+    
 </body>
 <script>
-    const form = document.getElementById('form')
+    const form = document.getElementById('form');
+    const diffForm = document.getElementById('diff-form');
 
     form.addEventListener('submit', async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
         const dataInput = document.getElementById('data-input').value;
         const timezoneInput = document.getElementById('timezone-input').value;
@@ -34,9 +79,36 @@
 
         const response = await fetch(`api/${dataInput || ""}?` + params.toString(), {
             method: 'GET',
-        })
-        const data = await response.json()
-        alert(data.utc + "  ,,,,,,,,," + data.unix + " ,,,,,,   " + data.formatedTime)
-    })
+        });
+
+        const data = await response.json();
+
+        // Preencher os dados nos elementos do HTML
+        document.getElementById('utc-span').textContent = data.utc
+        document.getElementById('unix-span').textContent = data.unix
+        document.getElementById('formatted-time-span').textContent = data.formatedTime
+    });
+
+    diffForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const data1 = document.getElementById('data1').value;
+        const data2 = document.getElementById('data2').value;
+
+        const response = await fetch(`api/diff/${data1}/${data2}`, {
+            method: 'GET',
+        });
+
+        const diffData = await response.json();
+
+        // Preencher os resultados da diferença nos elementos do HTML
+        document.getElementById('years-span').textContent = diffData.years
+        document.getElementById('months-span').textContent = diffData.months
+        document.getElementById('days-span').textContent = diffData.days
+        document.getElementById('hours-span').textContent = diffData.hours
+        document.getElementById('minutes-span').textContent = diffData.minutes
+        document.getElementById('seconds-span').textContent = diffData.seconds
+        document.getElementById('milliseconds-span').textContent = diffData.milliseconds
+    });
 </script>
 </html>
