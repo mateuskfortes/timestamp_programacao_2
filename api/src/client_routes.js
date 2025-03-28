@@ -28,7 +28,7 @@ export const getData = (req, res) => {
 
     res.json({ unix, utc, formatedTime })
 }
-
+ 
 // retorna a diferença entre as datas
 export const getDateDiff = (req, res) => {
     const starts = moment(dateHandler(req.params.date1))
