@@ -34,11 +34,7 @@ export const getDateDiff = (req, res) => {
     const starts = moment(dateHandler(req.params.date1))
     const ends = moment(dateHandler(req.params.date2))
 
-    // calcula a diferença em anos, meses, dias, horas, minutos, segundos e milisegundos
-    const years = ends.diff(starts, 'year');
-    starts.add(years, 'years');
-    const months = ends.diff(starts, 'months');
-    starts.add(months, 'months');
+    // calcula a diferença em dias, horas, minutos e segundos
     const days = ends.diff(starts, 'days');
     starts.add(days, 'days')
     const hours = ends.diff(starts, 'hours')
@@ -46,11 +42,9 @@ export const getDateDiff = (req, res) => {
     const minutes = ends.diff(starts, 'minutes')
     starts.add(minutes, 'minutes')
     const seconds = ends.diff(starts, 'seconds')
-    starts.add(seconds, 'seconds')
-    const milliseconds = ends.diff(starts, 'milliseconds')
 
     // converte os tempos para positivo caso sejam negativos
-    const diff = {years, months, days, hours, minutes, seconds, milliseconds}
+    const diff = {days, hours, minutes, seconds}
     Object.keys(diff).forEach(key => diff[key] = Math.abs(diff[key]) );
 
     res.json(diff)

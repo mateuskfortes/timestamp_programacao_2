@@ -52,13 +52,10 @@
         </form>
         <section>
             <h2>Resultado da Diferença:</h2>
-            <p>Anos: <span id="years-span"></span></p>
-            <p>Meses: <span id="months-span"></span></p>
             <p>Dias: <span id="days-span"></span></p>
             <p>Horas: <span id="hours-span"></span></p>
             <p>Minutos: <span id="minutes-span"></span></p>
             <p>Segundos: <span id="seconds-span"></span></p>
-            <p>Milissegundos: <span id="milliseconds-span"></span></p>
         </section>
     </section>
     
@@ -102,13 +99,10 @@
         const diffData = await response.json();
 
         // Preencher os resultados da diferença nos elementos do HTML
-        document.getElementById('years-span').textContent = diffData.years
-        document.getElementById('months-span').textContent = diffData.months
         document.getElementById('days-span').textContent = diffData.days
         document.getElementById('hours-span').textContent = diffData.hours
         document.getElementById('minutes-span').textContent = diffData.minutes
         document.getElementById('seconds-span').textContent = diffData.seconds
-        document.getElementById('milliseconds-span').textContent = diffData.milliseconds
     });
 </script>
 </html>
