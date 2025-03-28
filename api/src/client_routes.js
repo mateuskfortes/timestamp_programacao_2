@@ -43,7 +43,7 @@ export const getDateDiff = (req, res) => {
     starts.add(minutes, 'minutes')
     const seconds = ends.diff(starts, 'seconds')
 
-    // converte os tempos para positivo caso sejam negativos
+    // Transforma todos os tempos em valores positivos
     const diff = {days, hours, minutes, seconds}
     Object.keys(diff).forEach(key => diff[key] = Math.abs(diff[key]) );
 
