@@ -1,8 +1,8 @@
-import TimeForm from "./components/TimeForm"
+import TimeStamp from "./components/TimeStamp"
 
 function App() {
   return (
-    <TimeForm />
+    <TimeStamp />
   )
 }
 
