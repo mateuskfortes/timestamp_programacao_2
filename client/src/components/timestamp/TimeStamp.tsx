@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ShowTime from "./ShowTime";
+import ShowTime from "../ShowTime.tsx";
 import TimeStampForm from "./TimeStampForm";
 
 const TimeStamp = () => {
