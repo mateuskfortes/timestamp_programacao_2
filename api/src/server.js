@@ -10,6 +10,8 @@ dotenv.config();
 
 const app = express()
 
+app.use(express.static('public'));
+
 // Permite consulta entre domínios diferentes
 if (process.env.ENABLE_CORS === "true") {
     const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [];

@@ -1,108 +1,14 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>timestamp</title>
-    <style>
-        body {
-            display: flex;
-        }
-        body > section {
-            width: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-    </style>
-</head>
-<body>
-    <section>
-        <h1>Timestamp</h1>
-        <form id="form">
-            <div>
-                <label for="data-input">Data em unix ou utc: </label>
-                <input id="data-input" type="text">
-            </div>
-            <div>
-                <label for="timezone-input">Diga o timezone: </label>
-                <input id="timezone-input" type="text" placeholder="UTC">
-            </div>
-            <button type="submit">Enviar</button>
-        </form>
-        <section>
-            <h2>Tempos</h2>
-            <p>UTC: <span id="utc-span"></span></p>
-            <p>UNIX: <span id="unix-span"></span></p>
-            <p>Com timezone: <span id="formatted-time-span"></span></p>
-        </section>
-    </section>
-    <section>
-        <h1>Diferença entre datas</h1>
-        <form id="diff-form">
-            <div>
-                <label for="data1">primeira data: </label>
-                <input id="data1" type="text">
-            </div>
-            <div>
-                <label for="data2">segunda data: </label>
-                <input id="data2" type="text">
-            </div>
-            <button type="submit">comparar</button>
-        </form>
-        <section>
-            <h2>Resultado da Diferença:</h2>
-            <p>Dias: <span id="days-span"></span></p>
-            <p>Horas: <span id="hours-span"></span></p>
-            <p>Minutos: <span id="minutes-span"></span></p>
-            <p>Segundos: <span id="seconds-span"></span></p>
-        </section>
-    </section>
-    
-</body>
-<script>
-    const form = document.getElementById('form');
-    const diffForm = document.getElementById('diff-form');
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React + TS</title>
+    <script type="module" crossorigin src="main.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const dataInput = document.getElementById('data-input').value;
-        const timezoneInput = document.getElementById('timezone-input').value;
-
-        // Criar o parâmetro para a query string
-        const params = new URLSearchParams();
-        params.append('timezone', timezoneInput || 'UTC');
-
-        const response = await fetch(`api/${dataInput || ""}?` + params.toString(), {
-            method: 'GET',
-        });
-
-        const data = await response.json();
-
-        // Preencher os dados nos elementos do HTML
-        document.getElementById('utc-span').textContent = data.utc
-        document.getElementById('unix-span').textContent = data.unix
-        document.getElementById('formatted-time-span').textContent = data.formatedTime
-    });
-
-    diffForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const data1 = document.getElementById('data1').value;
-        const data2 = document.getElementById('data2').value;
-
-        const response = await fetch(`api/diff/${data1}/${data2}`, {
-            method: 'GET',
-        });
-
-        const diffData = await response.json();
-
-        // Preencher os resultados da diferença nos elementos do HTML
-        document.getElementById('days-span').textContent = diffData.days
-        document.getElementById('hours-span').textContent = diffData.hours
-        document.getElementById('minutes-span').textContent = diffData.minutes
-        document.getElementById('seconds-span').textContent = diffData.seconds
-    });
-</script>
+  </body>
 </html>
