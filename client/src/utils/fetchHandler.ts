@@ -1,4 +1,4 @@
-const ORIGIN = import.meta.env.VITE_ORIGIN || window.location.origin
+const ORIGIN = import.meta.env.MODE === 'development' ? import.meta.env.VITE_ORIGIN : window.location.origin
 
 const fetchHandler = async (url: string,
                             method: 'GET' | 'POST',
