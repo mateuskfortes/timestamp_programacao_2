@@ -1,8 +1,11 @@
-import { __dirname } from "./server.js"
 import moment from "moment"
 import path from 'path'
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const dateHandler = (time) => {
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+export const dateHandler = (time) => {
     // se o parametro date não existir, utiza o tempo atual
     if (!time) return new Date()
 

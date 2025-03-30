@@ -1,6 +1,4 @@
 import express from "express";
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { getData, getDateDiff, getMainPage } from "./client_routes.js";
 import cors from 'cors' 
 import dotenv from "dotenv";
@@ -20,7 +18,7 @@ if (process.env.ENABLE_CORS === "true") {
 }
 
 // pega a rota absoluta 
-export const __dirname = dirname(fileURLToPath(import.meta.url));
+
 
 app.get('/', getMainPage)
 
