@@ -21,7 +21,7 @@ export const getData = (req, res) => {
     const time = dateHandler(req.params.date)
 
     // tempo ajustado ao fuso horário
-    const formatedTime = time.toLocaleString('pt-BR', { timeZone: req.query.timezone })
+    const formatedTime = time.toLocaleString('pt-BR', { timeZone: req.query.timezone || 'UTC' })
 
     // transforma o tempo em utc e unix
     const unix = time.getTime()
