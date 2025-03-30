@@ -28,4 +28,4 @@ app.get('/api/:date?', getData)
 
 app.get('/api/diff/:date1/:date2', getDateDiff)
 
-app.listen('3000', () => console.log('Ouvindo na porta 3000'))
+app.listen(process.env.PORT, () => console.log('Server is listening on port', process.env.PORT))
