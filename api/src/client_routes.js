@@ -3,6 +3,7 @@ import path from 'path'
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// pega a rota absoluta 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export const dateHandler = (time) => {
