@@ -1,6 +1,7 @@
 import { useState } from "react"
 import TimeDiffForm from "./TimeDiffForm"
 import ShowTime from "../ShowTime"
+import fetchHandler from "../../utils/fetchHandler"
 
 const TimeDiff = () => {
     const [ days, setDays ] = useState('')
@@ -9,14 +10,13 @@ const TimeDiff = () => {
     const [ seconds, setSeconds ] = useState('')
 
     const handleSubmit = async (date1: string, date2: string) => {
-        const response = await fetch(`http://localhost:3000/api/diff/${date1}/${date2}`)
-
-        const data = await response.json()
-
-        setDays(data.days)
-        setHours(data.hours)
-        setMinutes(data.minutes)
-        setSeconds(data.seconds)
+        const okFunc = ({data}: any) => {
+            setDays(data.days)
+            setHours(data.hours)
+            setMinutes(data.minutes)
+            setSeconds(data.seconds)
+        }
+        fetchHandler(`api/diff/${date1}/${date2}`, 'GET', okFunc)
     }
 
     return (

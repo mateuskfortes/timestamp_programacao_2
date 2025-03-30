@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ShowTime from "../ShowTime.tsx";
 import TimeStampForm from "./TimeStampForm";
+import fetchHandler from "../../utils/fetchHandler.ts";
 
 const TimeStamp = () => {
     const [utc, setUtc] = useState('')
@@ -8,17 +9,16 @@ const TimeStamp = () => {
     const [withTimezone, setWithTimezone] = useState('')
 
     const handleSubmit = async (dataInput: string, timezoneInput: string) => {
+        const okFunc = ({data}: any) => {
+            setUtc(data.utc)
+            setUnix(data.unix)
+            setWithTimezone(data.formatedTime)
+        }
+
         const params = new URLSearchParams();
         params.append('timezone', timezoneInput || 'UTC');
 
-        const response = await fetch(`http://127.0.0.1:3000/api/${dataInput || ""}?` + params.toString(), {
-            method: 'GET',
-        });
-
-        const data = await response.json()
-        setUtc(data.utc)
-        setUnix(data.unix)
-        setWithTimezone(data.formatedTime)
+        fetchHandler(`api/${dataInput || ''}?${params.toString()}`, 'GET', okFunc)
     };
 
     return (
