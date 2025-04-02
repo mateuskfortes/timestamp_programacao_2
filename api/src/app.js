@@ -1,8 +1,9 @@
 import express from 'express'
-import { getData, getDateDiff, getMainPage } from "./client_routes.js";
+import { getDate, getDateDiff, getMainPage } from "./client_routes.js";
 import cors from 'cors' 
 import dotenv from "dotenv";
 import { warn } from './utils/custom_logs.js'
+import { ALLOWED_ORIGINS, PORT, ENABLE_CORS } from '../config.js'
 
 dotenv.config();
 
@@ -18,8 +19,8 @@ class App {
         this.app.use(express.static('public'));
         
         // Permite consulta entre domínios diferentes
-        if (process.env.ENABLE_CORS === "true") {
-            const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [];
+        if (ENABLE_CORS == "true") {
+            const allowedOrigins = ALLOWED_ORIGINS?.split(",") || [];
             this.app.use(cors({ origin: allowedOrigins.length > 0 ? allowedOrigins : "*" }));
             this.warn("Cross-Origin Resource Sharing: true\nAllowed origins:", allowedOrigins)
         }
@@ -27,11 +28,11 @@ class App {
 
     routes() {
         this.app.get('/', getMainPage)
-        this.app.get('/api/:date?', getData)
+        this.app.get('/api/:date?', getDate)
         this.app.get('/api/diff/:date1/:date2', getDateDiff)
     }
 
-    listen(port=process.env.PORT, func=() => console.log('Server is listening on port', process.env.PORT)) {
+    listen(port=PORT, func=() => console.log('Server is listening on port', PORT)) {
         this.app.listen(port, func)
     }
 

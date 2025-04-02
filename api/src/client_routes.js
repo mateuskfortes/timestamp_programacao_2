@@ -17,7 +17,7 @@ export const dateHandler = (time) => {
 
 export const getMainPage = (req, res) => res.sendFile(path.join(__dirname, 'templates', 'index.html'))
 
-export const getData = (req, res) => {
+export const getDate = (req, res) => {
     const time = dateHandler(req.params.date)
 
     // tempo ajustado ao fuso horário
