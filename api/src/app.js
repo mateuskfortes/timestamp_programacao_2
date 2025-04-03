@@ -19,7 +19,7 @@ class App {
         this.app.use(express.static('public'));
         
         // Permite consulta entre domínios diferentes
-        if (ENABLE_CORS == "true") {
+        if (ENABLE_CORS || ENABLE_CORS == "true") {
             const allowedOrigins = ALLOWED_ORIGINS?.split(",") || [];
             this.app.use(cors({ origin: allowedOrigins.length > 0 ? allowedOrigins : "*" }));
             this.warn("Cross-Origin Resource Sharing: true\nAllowed origins:", allowedOrigins)
