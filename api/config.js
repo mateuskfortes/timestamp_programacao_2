@@ -3,10 +3,10 @@ dotenv.config();
 
 
 const config = {
-    PORT: process.env.PORT || 3000,
+    PORT: 3000,
     
     // Allows CORS requests from the specified origins
-    ENABLE_CORS: process.env.ENABLE_CORS || true,
+    ENABLE_CORS: process.env.ENABLE_CORS || false,
     ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || 'https://localhost:5173',
 };
 
