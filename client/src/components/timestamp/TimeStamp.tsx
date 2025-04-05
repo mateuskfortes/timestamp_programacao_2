@@ -6,29 +6,26 @@ import fetchHandler from "../../utils/fetchHandler.ts";
 const TimeStamp = () => {
     const [utc, setUtc] = useState('')
     const [unix, setUnix] = useState('')
-    const [withTimezone, setWithTimezone] = useState('')
 
     const handleSubmit = async (dataInput: string, timezoneInput: string) => {
         const okFunc = ({data}: any) => {
             setUtc(data.utc)
             setUnix(data.unix)
-            setWithTimezone(data.formatedTime)
         }
 
         const params = new URLSearchParams();
-        params.append('timezone', timezoneInput || 'UTC');
+        params.append('timezone', timezoneInput);
 
         fetchHandler(`api/${dataInput || ''}?${params.toString()}`, 'GET', okFunc)
     };
 
     return (
-        <section>
+        <section className="timestamp">
+            <h1>Timestamp</h1>
             <TimeStampForm onSubmit={handleSubmit} />
-            <section>
-                <h2>Tempos</h2>
+            <section className="timestamp_result">
                 <ShowTime label="UTC" content={utc}></ShowTime>
                 <ShowTime label="UNIX" content={unix}></ShowTime>
-                <ShowTime label="Com timezone" content={withTimezone}></ShowTime>
             </section>
         </section>
         

@@ -1,0 +1,104 @@
+$h1_font_family: 'Courier New', Courier, monospace;
+$h1_font_size: 2.5rem;
+
+$content_font_family: 'arial', sans-serif;
+
+$app_section_height: 80vh;
+$app_section_width: 37vw;
+$app_section_padding: 40px 20px;
+$app_section_border_radius: 7px;
+
+$div_input_margin: 10px 0;
+
+$label_padding: 0 10px;
+$input_border: 1px solid black;
+$input_border_radius: 20px;
+$input_padding: 4px 8px;
+$submit_bt_margin: 2rem auto;
+$submit_bt_padding: 10px 20px;
+
+$time_diff_result_text_margin: 1rem auto;
+
+body {
+    background-color: rgba(128, 128, 128, 0.11);
+    .app {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        
+        .timestamp, .time_diff {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;;
+            height: $app_section_height;
+            width: $app_section_width;
+            padding: $app_section_padding;
+            font-family: $content_font_family;
+            background-color: white;
+            border-radius: $app_section_border_radius;
+            
+            h1 {
+                font-family: $h1_font_family;
+                text-align: center;
+                font-size: $h1_font_size;
+            }
+            
+            form {
+                padding: 20px;
+                border-radius: 5px;
+                
+
+                div {
+                    display: flex;
+                    justify-content: right;
+                    margin: $div_input_margin;
+
+                    label {
+                        display: flex;
+                        text-align: right;
+                        padding: $label_padding;
+                        align-items: center;
+                    }
+
+                    input, select {
+                        width: 15rem;
+                        padding: $input_padding;
+                        border: $input_border;
+                        border-radius: $input_border_radius;
+                        box-sizing: content-box;
+                        text-align: center;
+                    }
+                }
+                button {
+                    display: block;
+                    padding: $submit_bt_padding;
+                    margin: $submit_bt_margin
+                }
+            }
+        }
+
+        .timestamp_result{
+            p {
+                display: flex;
+                span {
+                    display: inline-block;
+                    width: 100%;
+                    text-align: center;
+                    font-weight: bold;
+                }
+            }
+        }
+        .time_diff_result {
+            p {
+                display: flex;
+                width: 25%;
+                margin: $time_diff_result_text_margin;
+                justify-content: space-between;
+                span {
+                    text-align: center;
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+}

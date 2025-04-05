@@ -10,7 +10,7 @@ const TimeDiffForm = ({onSubmit}: {onSubmit: (date1: string, date2: string) => v
     }
 
     return (
-        <form id="diff-form" onSubmit={handleSubmit}>
+        <form id="diff_form" onSubmit={handleSubmit}>
             <div>
                 <label htmlFor="date1">primeira data: </label>
                 <input 
@@ -25,7 +25,7 @@ const TimeDiffForm = ({onSubmit}: {onSubmit: (date1: string, date2: string) => v
                     type="text" 
                     onChange={(e) => setDate2(e.target.value)}/>
             </div>
-            <button type="submit">comparar</button>
+            <button type="submit">COMPARAR</button>
         </form>
     )
 }

@@ -20,15 +20,15 @@ const TimeDiff = () => {
     }
 
     return (
-        <section>
+        <section className="time_diff">
             <h1>Diferença entre datas</h1>
             <TimeDiffForm onSubmit={handleSubmit}/>
-            <div>
+            <section className="time_diff_result">
                 <ShowTime label="dias" content={days} />
                 <ShowTime label="horas" content={hours } />
                 <ShowTime label="minutos" content={minutes} />
                 <ShowTime label="segundos" content={seconds} />
-            </div>
+            </section>
         </section>
     )
 }
