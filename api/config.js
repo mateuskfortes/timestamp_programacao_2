@@ -7,7 +7,7 @@ const config = {
     
     // Allows CORS requests from the specified origins
     ENABLE_CORS: process.env.ENABLE_CORS || false,
-    ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || 'https://localhost:5173',
+    ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || 'http://localhost:5173',
 };
 
 
