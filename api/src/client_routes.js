@@ -2,6 +2,9 @@ import moment from "moment"
 import path from 'path'
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 // pega a rota absoluta 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -59,4 +62,36 @@ export const getDateDiff = (req, res) => {
     Object.keys(diff).forEach(key => diff[key] = Math.abs(diff[key]) );
 
     res.json(diff)
+}
+
+export const searchTimezone = async (req, res) => {
+    const query = req.query.q
+
+    // Se não houver query, retorna 10 fusos horários distintos
+    if (!query) {
+        return res.json(await prisma.timezone.findMany({
+            distinct: ['utc_offset'],
+            select: {
+                name: true,
+                utc_offset: true,
+                country_code: true,
+            }
+        }))         
+    }
+
+    res.json(await prisma.timezone.findMany({
+        where: {
+            OR: [
+                { name: { contains: query } },
+                { country_code: { contains: query } },
+                { utc_offset: { contains: query } },
+            ]
+        },
+        select: {
+            name: true,
+            utc_offset: true,
+            country_code: true,
+        },
+        take: 10,
+    }))
 }

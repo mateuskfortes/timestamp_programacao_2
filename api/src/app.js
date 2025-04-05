@@ -1,5 +1,5 @@
 import express from 'express'
-import { getDate, getDateDiff, getMainPage } from "./client_routes.js";
+import { getDate, getDateDiff, getMainPage, searchTimezone } from "./client_routes.js";
 import cors from 'cors' 
 import dotenv from "dotenv";
 import { warn } from './utils/custom_logs.js'
@@ -30,6 +30,7 @@ class App {
         this.app.get('/', getMainPage)
         this.app.get('/api/:date?', getDate)
         this.app.get('/api/diff/:date1/:date2', getDateDiff)
+        this.app.get('/search_timezone/', searchTimezone)
     }
 
     listen(port=PORT, func=() => console.log('Server is listening on port', PORT)) {

@@ -5,6 +5,9 @@ import fs from "fs";
 import path from "path";
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 describe('Test functions', () => {
     test('Date object creation with Unix time', () => {
@@ -97,6 +100,41 @@ describe('Test routes', () => {
 
         test('Send two Utc data', async () => {
             const response = await request(app).get('/api/diff/Sun,%2030%20Mar%202025%2019:13:57%20GMT/Thu,%2024%20Jul%202025%2013:00:37%20GMT')
+            expect(response.body).toEqual(expectedResponse)
+        })
+    })
+
+    describe('/search_timezone/ route', () => {
+        test('Search timezone without query', async () => {
+            let expectedResponse = await prisma.timezone.findMany({
+                distinct: ['utc_offset'],
+                select: {
+                    name: true,
+                    utc_offset: true,
+                    country_code: true,
+                }
+            })
+            const response = await request(app).get('/search_timezone')
+            expect(response.body).toEqual(expectedResponse)
+        })
+
+        test('Search timezone with query', async () => {
+            let expectedResponse = await prisma.timezone.findMany({
+                where: {
+                    OR: [
+                        { name: { contains: 'America' } },
+                        { country_code: { contains: 'America' } },
+                        { utc_offset: { contains: 'America' } },
+                    ]
+                },
+                select: {
+                    name: true,
+                    utc_offset: true,
+                    country_code: true,
+                },
+                take: 10,
+            })
+            const response = await request(app).get('/search_timezone?q=America')
             expect(response.body).toEqual(expectedResponse)
         })
     })
