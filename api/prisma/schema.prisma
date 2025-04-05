@@ -12,6 +12,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -23,7 +24,7 @@ model Timezone {
   id                     Int      @id @default(autoincrement())
   country_code           String   @db.VarChar(2)
   utc_offset             String   @db.VarChar(6)
-  name                   String   @db.VarChar(256)
+  name                   String   @unique @db.VarChar(256)
   daylight_saving_offset String?  @db.VarChar(6)
 }
 
