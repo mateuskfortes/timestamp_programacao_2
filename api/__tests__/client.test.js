@@ -20,7 +20,7 @@ describe('Test functions', () => {
     test('Date object creation with timezone', () => {
         const date = new Date('Sun, 30 Mar 2025 15:02:50 GMT -3')
         date.setUTCHours(date.getUTCHours() + (-3))
-        expect(dateHandler('Sun, 30 Mar 2025 18:02:50 GMT', -3)).toEqual(date)
+        expect(dateHandler('Sun, 30 Mar 2025 18:02:50 GMT', '-3')).toEqual(date)
     })
 })
 

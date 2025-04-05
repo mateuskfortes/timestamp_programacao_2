@@ -22,11 +22,11 @@ async function getWikiTimezones(url) {
 				rowData.push($(cell).text().trim().replace(/\s+/g, " "));
 			});
 
-			if (rowData.length >= 6 && rowData[4].lenght <= 6 && rowData[5].length <= 6) {
+			if (rowData.length >= 6 && rowData[4].length <= 6 && rowData[5].length <= 6 && !rowData[1].startsWith("Etc/")) {
 				return prisma.timezone.create({
 					data: {
 						country_code: rowData[0].slice(0, 2),
-						utc_offset: rowData[4],
+						utc_offset: rowData[4].replace('−', '-'),
 						name: rowData[1],
 						daylight_saving_offset: rowData[5]
 					},

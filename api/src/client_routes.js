@@ -9,9 +9,8 @@ const prisma = new PrismaClient()
 // pega a rota absoluta 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export const dateHandler = (time, timezone_string=0) => {
-    const timezone_number = Number(timezone_string)
-
+export const dateHandler = (time, timezone_string='0') => {
+    const timezone_number = Number(timezone_string.replace(/:\d{2}/, '').trim())
     let date
 
     // se o parametro date não existir, utiza o tempo atual
@@ -20,7 +19,6 @@ export const dateHandler = (time, timezone_string=0) => {
     // Ao criar, converte a data para o tipo Number caso esteja em unix
     else date = new Date(!isNaN(time) ? Number(time) : time)
     
-
     // Ajusta o fuso horário
     if (timezone_string != 0) date.setUTCHours(date.getUTCHours() + (timezone_number))
 
