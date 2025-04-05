@@ -5,7 +5,6 @@ import fs from "fs";
 import path from "path";
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe } from 'node:test';
 
 describe('Test functions', () => {
     test('Date object creation with Unix time', () => {
@@ -13,6 +12,12 @@ describe('Test functions', () => {
     })
     test('Date object creation with Utc time', () => {
         expect(dateHandler('Sun, 30 Mar 2025 18:02:50 GMT')).toEqual(new Date('Sun, 30 Mar 2025 18:02:50 GMT'))
+    })
+
+    test('Date object creation with timezone', () => {
+        const date = new Date('Sun, 30 Mar 2025 15:02:50 GMT -3')
+        date.setUTCHours(date.getUTCHours() + (-3))
+        expect(dateHandler('Sun, 30 Mar 2025 18:02:50 GMT', -3)).toEqual(date)
     })
 })
 
@@ -45,16 +50,25 @@ describe('Test routes', () => {
             expect(response.body).toEqual(expectedResponse)
         })
 
+        test('Send Utc data with timezone', async () => {
+            const expectedResponse = {
+                unix: 1743362037000,
+                utc: 'Sun, 30 Mar 2025 19:13:57 GMT -3'
+            }
+            response = await request(app).get('/api/Sun,%2030%20Mar%202025%2022:13:57%20GMT?timezone=-3')
+            expect(response.body).toEqual(expectedResponse)
+        })
+
         test('Send without data', async () => {
             // Ignora o último segundo do tempo
             function bypassSecond(obj) {
                 const unix = Math.floor(obj.unix / 10000) * 10000
-                const utc = obj.utc.replace(/\d{1}\sGMT$/, '0 GMT');
+                const utc = obj.utc.replace(/\d{1}\sGMT/, '0 GMT');
                 return { unix, utc };
             }
 
             const date = new Date()
-            expectedResponse = {
+            const expectedResponse = {
                 unix: date.getTime(),
                 utc: date.toUTCString()
             }
@@ -64,7 +78,7 @@ describe('Test routes', () => {
         })
 
         test('Send invalid data', async () => {
-            expectedResponse = { error: "Invalid Date" }
+            const expectedResponse = { error: "Invalid Date" }
             response = await request(app).get('/api/aaaa')
             expect(response.body).toEqual(expectedResponse)
         })
