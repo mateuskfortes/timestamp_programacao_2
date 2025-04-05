@@ -20,8 +20,8 @@ export const getMainPage = (req, res) => res.sendFile(path.join(__dirname, 'temp
 export const getDate = (req, res) => {
     const time = dateHandler(req.params.date)
 
-    // tempo ajustado ao fuso horário
-    const formatedTime = time.toLocaleString('pt-BR', { timeZone: req.query.timezone || 'UTC' })
+    // ajusta o fuso horário
+    time.setUTCHours(time.getUTCHours() - (req.query.timezone || 0))
 
     // transforma o tempo em utc e unix
     const unix = time.getTime()
@@ -30,7 +30,7 @@ export const getDate = (req, res) => {
     // retorna erro caso a data seja inválida
     if (isNaN(unix)) return res.json({ error: "Invalid Date" })
 
-    res.json({ unix, utc, formatedTime })
+    res.json({ unix, utc })
 }
  
 // retorna a diferença entre as datas

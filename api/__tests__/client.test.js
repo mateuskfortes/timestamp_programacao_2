@@ -33,7 +33,6 @@ describe('Test routes', () => {
         let expectedResponse = {
             utc: 'Sun, 30 Mar 2025 19:13:57 GMT',
             unix: 1743362037000,
-            formatedTime: "30/03/2025, 19:13:57",
         }
 
         test('Send unxi data', async () => {
@@ -51,19 +50,16 @@ describe('Test routes', () => {
             function bypassSecond(obj) {
                 const unix = Math.floor(obj.unix / 10000) * 10000
                 const utc = obj.utc.replace(/\d{1}\sGMT$/, '0 GMT');
-                const formatedTime = obj.formatedTime.replace(/\d{1}$/, '0');
-                return { unix, utc, formatedTime};
+                return { unix, utc };
             }
 
             const date = new Date()
             expectedResponse = {
                 unix: date.getTime(),
-                utc: date.toUTCString(),
-                formatedTime: date.toLocaleString('pt-BR', { timeZone: 'UTC'})
+                utc: date.toUTCString()
             }
             response = await request(app).get('/api/')
             expect(bypassSecond(response.body)).toEqual(bypassSecond(expectedResponse))
-            console.log(response.body.formatedTime)
 
         })
 
