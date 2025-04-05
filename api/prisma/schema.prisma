@@ -4,6 +4,12 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// SQL:
+// CREATE USER IF NOT EXISTS 'prisma_user'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+// grant all privileges on timestamp_api.* to 'prisma_user'@'localhost';
+// flush privileges;
+// create database timestamp_api;
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,10 +21,10 @@ datasource db {
 
 model Timezone {
   id                     Int      @id @default(autoincrement())
+  country_code           String   @db.VarChar(2)
   utc_offset             String   @db.VarChar(6)
   name                   String   @db.VarChar(256)
   daylight_saving_offset String?  @db.VarChar(6)
-  is_dst                 Boolean
 }
 
 model Date {

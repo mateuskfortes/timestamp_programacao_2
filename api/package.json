@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "dev": "node --watch src/server.js"
+    "dev": "node --watch src/server.js",
+    "load-timezone": "npm install axios cheerio --no-save && node src/utils/load_timeZone.js && npm uninstall axios cheerio"
   },
   "keywords": [],
   "author": "Mateus Fortes",
