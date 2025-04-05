@@ -1,8 +1,11 @@
 import { useState } from "react";
+import SearchBar from "./SearchBar";
 
 const TimeStampForm = ({onSubmit}: { onSubmit: (dataInput: string, timezoneInput: string) => void}) => {
     const [dataInput, setDataInput] = useState("");
-    const [timezoneInput, setTimezoneInput] = useState("0");
+    const [timezoneInput, setTimezoneInput] = useState("");
+
+    
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -11,8 +14,9 @@ const TimeStampForm = ({onSubmit}: { onSubmit: (dataInput: string, timezoneInput
 
     return(
         <form id="time-form" onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="data-input">Data em Unix ou UTC: </label>
+            <div>
+                <label htmlFor="data-input">Data em Unix ou UTC: </label>
+                <div className="date_input">
                     <input
                         id="data-input"
                         type="text"
@@ -20,28 +24,13 @@ const TimeStampForm = ({onSubmit}: { onSubmit: (dataInput: string, timezoneInput
                         onChange={(e) => setDataInput(e.target.value)}
                     />
                 </div>
-                <div>
-                    <label htmlFor="timezone-input">Para o fuso horário: </label>
-                    
-                    <select 
-                        id="timezone-input"
-                        value={timezoneInput}
-                        onChange={(e) => setTimezoneInput(e.target.value)}
-                        >
-                        { 
-                            Array.from({length: 12}, (_, i) => i - 12).map((value) => (
-                                <option key={value} value={value}>{value}</option>
-                            ))
-                        }
-                        {
-                            Array.from({length: 13}, (_, i) => i).map((value) => (
-                                <option key={value} value={'+' + value}>{'+' + value}</option>
-                            ))
-                        }
-                    </select>
-                </div>
-                <button type="submit">DESCOBRIR</button>
-            </form>
+            </div>
+            <div>
+                <label htmlFor="timezone-input">Aplicar o fuso horário: </label>
+                <SearchBar timezone={timezoneInput} setTZ={setTimezoneInput}/>
+            </div>
+            <button type="submit">DESCOBRIR</button>
+        </form>
     )
 }
 

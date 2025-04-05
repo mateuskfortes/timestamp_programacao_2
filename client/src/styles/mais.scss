@@ -21,6 +21,7 @@ $time_diff_result_text_margin: 1rem auto;
 
 body {
     background-color: rgba(128, 128, 128, 0.11);
+    height: 100%;
     .app {
         display: flex;
         align-items: center;
@@ -59,15 +60,51 @@ body {
                         padding: $label_padding;
                         align-items: center;
                     }
+                    
+                    .date_input, .timezone_search_bar {
+                        position: relative;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        margin: 0;
+                        padding: 0;
+                        
+                        .suggestions {
+                            position: absolute;
+                            top: 100%;
+                            left: 50%;
+                            height: 17rem;
+                            overflow-y: scroll;
+                            transform: translate(-50%, 0);
+                            padding: 5px;
+                            background-color: white;
+                            border-radius: 5px;
+                            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+                            width: 23rem;
+                            
+                            li {
+                                list-style: none;
+                                padding: 10px;
+                                margin: 0;
+                                cursor: pointer;
+                                
+                                &:hover {
+                                    background-color: #f0f0f0;
+                                }
 
-                    input, select {
-                        width: 15rem;
-                        padding: $input_padding;
-                        border: $input_border;
-                        border-radius: $input_border_radius;
-                        box-sizing: content-box;
-                        text-align: center;
-                    }
+                            }
+                        }
+                        input {
+                            width: 15rem;
+                            padding: $input_padding;
+                            margin: 0;
+                            border: $input_border;
+                            border-radius: $input_border_radius;
+                            box-sizing: content-box;
+                            text-align: center;
+                            
+                        }
+                    } 
                 }
                 button {
                     display: block;
