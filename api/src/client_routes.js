@@ -10,7 +10,7 @@ const prisma = new PrismaClient()
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export const dateHandler = (time, timezone_string='0') => {
-    const timezone_number = Number(timezone_string.replace(/:\d{2}/, '').trim())
+    const timezone_number = Number(timezone_string.replace(/:\d{0,2}/, '').trim())
     let date
 
     // se o parametro date não existir, utiza o tempo atual
@@ -28,8 +28,10 @@ export const dateHandler = (time, timezone_string='0') => {
 export const getMainPage = (req, res) => res.sendFile(path.join(__dirname, 'templates', 'index.html'))
 
 export const getDate = (req, res) => {
-    const timezone = req.query.timezone
+    let timezone = req.query.timezone
     const time = dateHandler(req.params.date, timezone)
+
+    timezone = timezone?.replace(/(?<=[+-])(?=\d[:$])/, '0').replace(/:\d{0,2}/, ':00')
 
     // transforma o tempo em utc e unix
     const unix = time.getTime()
@@ -63,7 +65,14 @@ export const getDateDiff = (req, res) => {
 }
 
 export const searchTimezone = async (req, res) => {
-    const query = req.query.q
+    let query = req.query.q?.split(' ')
+    
+    query.map((item, index) => {
+        if (!isNaN(item?.replace(/[:,]/, ''))) {
+            query[index] = item.trim().replace(',', ":").replace(/([-+])(\d)(?!\d)/, '$1' + '0$2')
+        }
+    })
+
 
     // Se não houver query, retorna 10 fusos horários distintos
     if (!query) {
@@ -77,13 +86,18 @@ export const searchTimezone = async (req, res) => {
         }))         
     }
 
+    const queryConditions = query.map((item) => item ? ({
+        OR: [
+            { name: { contains: item } },
+            { country_code: { contains: item } },
+            { utc_offset: { contains: item } },
+        ]
+    }) : null) // Retorna `null` se `item` for inválido
+    .filter(Boolean); // Remove `null` e `undefined`
+    
     res.json(await prisma.timezone.findMany({
         where: {
-            OR: [
-                { name: { contains: query } },
-                { country_code: { contains: query } },
-                { utc_offset: { contains: query } },
-            ]
+            AND: queryConditions
         },
         select: {
             name: true,

@@ -5,9 +5,10 @@ const SearchBar = ({ timezone, setTZ }: any) => {
     const [timezones, setTimezones] = useState<{ name: string; utc_offset: string; country_code: string }[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
-
+    
     useEffect(() => {
-        fetchHandler(`search_timezone/${timezone.length > 0 ? `?q=${timezone}` : ""}`, "GET", ({ data }) => setTimezones(data));
+        const tzQuery = 'q=' + timezone.replace('+', '%2B') // replace '+' with '%2B' for URL encoding
+        fetchHandler(`search_timezone/?${tzQuery}`, "GET", ({ data }) => setTimezones(data));
     }, [timezone]);
 
     useEffect(() => {
