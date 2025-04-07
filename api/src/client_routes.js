@@ -9,8 +9,18 @@ const prisma = new PrismaClient()
 // pega a rota absoluta 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+const formatTimezone = (timezone) => timezone?.trim()
+                                    .replace(',', ':')
+                                    .replace(/(?<=[+-])(?=\d(?=:|$))/, '0')
+                                    .replace(/:(\d)$/, ':$1' + '0')
+                                    .replace(/:$/, ':00')
+                                    .replace(/(?<=[+-]\d{2}$)/, ':00')
+ 
 export const dateHandler = (time, timezone_string='0') => {
-    const timezone_number = Number(timezone_string.replace(/:\d{0,2}/, '').trim())
+    const splited_timezone = timezone_string.trim().split(':')
+    const hours = Number(splited_timezone[0])
+    const minutes = Number(splited_timezone[1])
+
     let date
 
     // se o parametro date não existir, utiza o tempo atual
@@ -20,18 +30,15 @@ export const dateHandler = (time, timezone_string='0') => {
     else date = new Date(!isNaN(time) ? Number(time) : time)
     
     // Ajusta o fuso horário
-    if (timezone_string != 0) date.setUTCHours(date.getUTCHours() + (timezone_number))
-
+    if (timezone_string != 0) date.setUTCHours(date.getUTCHours() + hours, date.getUTCMinutes() + minutes)
     return date
 }
 
 export const getMainPage = (req, res) => res.sendFile(path.join(__dirname, 'templates', 'index.html'))
 
 export const getDate = (req, res) => {
-    let timezone = req.query.timezone
+    const timezone = formatTimezone(req.query.timezone)
     const time = dateHandler(req.params.date, timezone)
-
-    timezone = timezone?.replace(/(?<=[+-])(?=\d[:$])/, '0').replace(/:\d{0,2}/, ':00')
 
     // transforma o tempo em utc e unix
     const unix = time.getTime()
@@ -68,8 +75,9 @@ export const searchTimezone = async (req, res) => {
     let query = req.query.q?.split(' ')
     
     query.map((item, index) => {
-        if (!isNaN(item?.replace(/[:,]/, ''))) {
-            query[index] = item.trim().replace(',', ":").replace(/([-+])(\d)(?!\d)/, '$1' + '0$2')
+        // Se o item for uma hora, fromata para o formato correto
+        if (item.match(/^[+-]?\d{1,2}[:,]?\d{0,2}$/)) {
+            query[index] = formatTimezone(item)
         }
     })
 

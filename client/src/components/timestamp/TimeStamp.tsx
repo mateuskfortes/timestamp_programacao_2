@@ -14,7 +14,7 @@ const TimeStamp = () => {
         }
 
         const params = new URLSearchParams();
-        const tzParam = timezoneInput.split(' ')[2] ? timezoneInput.split(' ')[2] : timezoneInput
+        const tzParam = timezoneInput.split(' ')[1] ? timezoneInput.split(' ')[1] : timezoneInput
         params.append('timezone', tzParam);
 
         fetchHandler(`api/${dataInput || ''}?${params.toString()}`, 'GET', okFunc)

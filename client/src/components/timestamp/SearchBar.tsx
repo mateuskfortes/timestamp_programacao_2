@@ -38,11 +38,11 @@ const SearchBar = ({ timezone, setTZ }: any) => {
                         <li
                             key={index}
                             onClick={() => {
-                                setTZ(`${suggestion.country_code} ${suggestion.name} ${suggestion.utc_offset}`);
+                                setTZ(`${suggestion.name} ${suggestion.utc_offset}`);
                                 setShowSuggestions(false);
                             }}
                         >
-                            <span>{suggestion.country_code}</span> <span>{suggestion.name}</span> <span>{suggestion.utc_offset}</span>
+                            <span>{suggestion.name}</span> <span>{suggestion.utc_offset}</span>
                         </li>
                     ))}
                 </ul>
