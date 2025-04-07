@@ -9,13 +9,11 @@ const prisma = new PrismaClient()
 // pega a rota absoluta 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const formatTimezone = (timezone) => timezone?.trim()
-                                    .replace(',', ':')
-                                    .replace(/(?<=[+-])(?=\d(?=:|$))/, '0')
-                                    .replace(/:(\d)$/, ':$1' + '0')
-                                    .replace(/:$/, ':00')
-                                    .replace(/(?<=[+-]\d{2}$)/, ':00')
- 
+const formatTimezone = (timezone, toSearch=false) => {
+    timezone = timezone?.trim().replace(',', ':').replace(/(?<=[+-])(?=\d(?=:|$))/, '0').replace(/:$/, ':00').replace(/(?<=[+-]\d{2}$)/, ':00')
+    if (!toSearch) return timezone.replace(/:(\d)$/, ':$1' + '0')
+    return timezone
+}
 export const dateHandler = (time, timezone_string='0') => {
     const splited_timezone = timezone_string.trim().split(':')
     const hours = Number(splited_timezone[0])
@@ -77,7 +75,7 @@ export const searchTimezone = async (req, res) => {
     query.map((item, index) => {
         // Se o item for uma hora, fromata para o formato correto
         if (item.match(/^[+-]?\d{1,2}[:,]?\d{0,2}$/)) {
-            query[index] = formatTimezone(item)
+            query[index] = formatTimezone(item, true)
         }
     })
 
