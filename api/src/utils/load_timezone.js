@@ -4,6 +4,13 @@ import * as cheerio from "cheerio";
 
 const prisma = new PrismaClient();
 
+/*
+	Baixa os timezones na tabela da wikipédia disponível em: 
+		"https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List"
+	Para a tabela timezone
+*/
+
+
 async function getWikiTimezones(url) {
 	try {
 		const { data } = await axios.get(url, {

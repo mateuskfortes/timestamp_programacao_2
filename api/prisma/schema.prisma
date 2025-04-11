@@ -16,16 +16,16 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Timezone {
   id                     Int      @id @default(autoincrement())
-  country_code           String   @db.VarChar(2)
-  utc_offset             String   @db.VarChar(6)
-  name                   String   @unique @db.VarChar(256)
-  daylight_saving_offset String?  @db.VarChar(6)
+  country_code           String
+  utc_offset             String   
+  name                   String   
+  daylight_saving_offset String? 
 }
 
 model Date {
@@ -35,9 +35,9 @@ model Date {
 
 model Administrator {
   id       Int    @id @default(autoincrement())
-  email    String @unique @db.VarChar(256)
-  password String @db.VarChar(256)
-  name     String @db.VarChar(128)
+  email    String @unique 
+  password String 
+  name     String 
 }
 
 model TimeDiff {

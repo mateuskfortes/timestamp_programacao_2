@@ -20,7 +20,7 @@ describe('Test functions', () => {
     test('Date object creation with timezone', () => {
         const date = new Date('Sun, 30 Mar 2025 15:02:50 GMT -3')
         date.setUTCHours(date.getUTCHours() + (-3))
-        expect(dateHandler('Sun, 30 Mar 2025 18:02:50 GMT', '-3')).toEqual(date)
+        expect(dateHandler('Sun, 30 Mar 2025 18:02:50 GMT', '-03:00')).toEqual(date)
     })
 })
 
@@ -56,7 +56,7 @@ describe('Test routes', () => {
         test('Send Utc data with timezone', async () => {
             const expectedResponse = {
                 unix: 1743362037000,
-                utc: 'Sun, 30 Mar 2025 19:13:57 GMT -3'
+                utc: 'Sun, 30 Mar 2025 19:13:57 GMT -03:00'
             }
             response = await request(app).get('/api/Sun,%2030%20Mar%202025%2022:13:57%20GMT?timezone=-3')
             expect(response.body).toEqual(expectedResponse)

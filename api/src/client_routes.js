@@ -10,9 +10,12 @@ const prisma = new PrismaClient()
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const formatTimezone = (timezone, toSearch=false) => {
-    timezone = timezone?.trim().replace(',', ':').replace(/(?<=[+-])(?=\d(?=:|$))/, '0').replace(/:$/, ':00').replace(/(?<=[+-]\d{2}$)/, ':00')
-    if (!toSearch) return timezone.replace(/:(\d)$/, ':$1' + '0')
-    return timezone
+    if (timezone) {
+        timezone = timezone?.trim().replace(',', ':').replace(/(?<=[+-])(?=\d(?=:|$))/, '0').replace(/:$/, ':00').replace(/(?<=[+-]\d{2}$)/, ':00')
+        if (!toSearch) return timezone.replace(/:(\d)$/, ':$1' + '0')
+        return timezone
+    }
+    return '+00:00'
 }
 export const dateHandler = (time, timezone_string='0') => {
     const splited_timezone = timezone_string.trim().split(':')
@@ -40,9 +43,10 @@ export const getDate = (req, res) => {
 
     // transforma o tempo em utc e unix
     const unix = time.getTime()
-    const utc = time.toUTCString() + (timezone && timezone != 0 ? ` ${timezone}` : '')
+    const utc = time.toUTCString() + (timezone && !timezone.includes('00:00') ? ` ${timezone}` : '')
     
     // retorna erro caso a data seja inválida
+    console.log(unix)
     if (isNaN(unix)) return res.json({ error: "Invalid Date" })
 
     res.json({ unix, utc })
@@ -72,14 +76,7 @@ export const getDateDiff = (req, res) => {
 export const searchTimezone = async (req, res) => {
     let query = req.query.q?.split(' ')
     
-    query.map((item, index) => {
-        // Se o item for uma hora, fromata para o formato correto
-        if (item.match(/^[+-]?\d{1,2}[:,]?\d{0,2}$/)) {
-            query[index] = formatTimezone(item, true)
-        }
-    })
-
-
+    
     // Se não houver query, retorna 10 fusos horários distintos
     if (!query) {
         return res.json(await prisma.timezone.findMany({
@@ -91,7 +88,14 @@ export const searchTimezone = async (req, res) => {
             }
         }))         
     }
-
+    
+    query.map((item, index) => {
+        // Se o item for uma hora, fromata para o formato correto
+        if (item.match(/^[+-]?\d{1,2}[:,]?\d{0,2}$/)) {
+            query[index] = formatTimezone(item, true)
+        }
+    })
+    
     const queryConditions = query.map((item) => item ? ({
         OR: [
             { name: { contains: item } },
