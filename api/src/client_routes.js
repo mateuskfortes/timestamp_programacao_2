@@ -46,7 +46,6 @@ export const getDate = (req, res) => {
     const utc = time.toUTCString() + (timezone && !timezone.includes('00:00') ? ` ${timezone}` : '')
     
     // retorna erro caso a data seja inválida
-    console.log(unix)
     if (isNaN(unix)) return res.json({ error: "Invalid Date" })
 
     res.json({ unix, utc })

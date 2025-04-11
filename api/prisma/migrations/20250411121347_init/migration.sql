@@ -1,10 +1,10 @@
 -- CreateTable
 CREATE TABLE "Timezone" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "country_code" TEXT NOT NULL,
     "utc_offset" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "daylight_saving_offset" TEXT,
-    "is_dst" BOOLEAN NOT NULL
+    "daylight_saving_offset" TEXT
 );
 
 -- CreateTable
