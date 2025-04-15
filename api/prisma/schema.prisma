@@ -1,51 +1,66 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-// SQL:
-// CREATE USER IF NOT EXISTS 'prisma_user'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
-// grant all privileges on timestamp_api.* to 'prisma_user'@'localhost';
-// flush privileges;
-// create database timestamp_api;
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["views"]
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
-model Timezone {
-  id                     Int      @id @default(autoincrement())
-  country_code           String
-  utc_offset             String   
-  name                   String   
-  daylight_saving_offset String? 
-}
-
-model Date {
-  id Int @id @default(autoincrement())
-  date DateTime
-}
-
-model Administrator {
+model administrator {
   id       Int    @id @default(autoincrement())
-  email    String @unique 
-  password String 
-  name     String
+  email    String @unique(map: "Administrator_email_key") @db.VarChar(256)
+  password String @db.VarChar(256)
+  name     String @db.VarChar(128)
 }
 
-model TimeDiff {
-  id          String   @id
-  searched_at DateTime
+model date {
+  id                       Int         @id @default(autoincrement())
+  date                     DateTime
+
+  // timezone been used in the date
+  used_timezone            timezone    @relation("used_timezone", fields: [used_timezone_id], references: [id])
+  used_timezone_id         Int
+
+  // timezone that will be applied to the date
+  aplicated_timezone       timezone    @relation("aplicated_timezone",fields: [aplicated_timezone_id], references: [id])
+  aplicated_timezone_id    Int
+
+  timestamp                timestamp[]
+
+  first_timediff           timediff[]  @relation("first_date")
+  second_timediff          timediff[]  @relation("second_date")
 }
 
-model Timestamp {
+model timediff {
   id          String   @id
   searched_at DateTime
+
+  first_date    date     @relation("first_date", fields: [first_date_id], references: [id])
+  first_date_id Int
+
+  second_date   date     @relation("second_date", fields: [second_date_id], references: [id])
+  second_date_id Int
+}
+
+model timestamp {
+  id          String   @id
+  searched_at DateTime
+
+  date        date     @relation(fields: [date_id], references: [id])
+  date_id     Int
+}
+
+model timezone {
+  id                     Int     @id @default(autoincrement())
+  utc_offset             String  @db.VarChar(6)
+  name                   String  @unique(map: "Timezone_name_key") @db.VarChar(256)
+  daylight_saving_offset String? @db.VarChar(6)
+  country_code           String  @db.VarChar(2)
+
+  date_using             date[]  @relation("used_timezone")
+  date_aplicated         date[]  @relation("aplicated_timezone")
+
+  @@index([utc_offset, name, country_code])
 }
