@@ -45,7 +45,7 @@ model timediff {
 }
 
 model timestamp {
-  id          String   @id
+  id          String   @id @default(uuid())
   searched_at DateTime
 
   date        date     @relation(fields: [date_id], references: [id])
@@ -57,7 +57,7 @@ model timezone {
   utc_offset             String  @db.VarChar(6)
   name                   String  @unique(map: "Timezone_name_key") @db.VarChar(256)
   daylight_saving_offset String? @db.VarChar(6)
-  country_code           String  @db.VarChar(2)
+  country_code           String? @db.VarChar(2)
 
   date_using             date[]  @relation("used_timezone")
   date_aplicated         date[]  @relation("aplicated_timezone")
