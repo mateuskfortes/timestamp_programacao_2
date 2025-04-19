@@ -13,8 +13,83 @@ const prisma = new PrismaClient()
 
 const mockInsertTimestampAplTzTime = jest.fn()
 const mockInsertTimestampAplTzName = jest.fn()
+const mockInsertTimestamp = jest.fn()
 
 const formatToParams = (param) => param.replace(' ', '%20')
+
+describe("Function's tests", () => {
+    it('Should save timestamp data into database with timezone name', async () => {
+        mockInsertTimestamp.mockClear()
+
+        const date_param = 'Sun, 13 Mar 2022 17:10:07 GMT'
+        const date_obj = new Date(date_param)
+        const used_timezone = '+00:00'
+        const aplicated_timezone = 'America/Belem'
+
+        database.insertTimestampAplTzName(date_obj, used_timezone, aplicated_timezone, mockInsertTimestamp)
+
+        const expected_used_timezone_query = {
+            connectOrCreate: {
+                where: {
+                    name: 'etc/gmt' + used_timezone
+                },
+                create: {
+                    name: 'etc/gmt' + used_timezone,
+                    utc_offset: used_timezone
+                }
+            }
+        }
+        const expected_aplicated_timezone_query = {
+            connect: {
+                name: aplicated_timezone
+            }
+        }
+
+        expect(mockInsertTimestamp.mock.calls).toHaveLength(1)                                              // check mockInsertTimestamp was called once
+        expect(mockInsertTimestamp.mock.calls[0][0].toUTCString()).toBe('Sun, 13 Mar 2022 17:10:07 GMT')    // check date parameter 
+        expect(mockInsertTimestamp.mock.calls[0][1]).toEqual(expected_used_timezone_query)                  // check used_timezone parameter
+        expect(mockInsertTimestamp.mock.calls[0][2]).toEqual(expected_aplicated_timezone_query)             // check aplicated_timezone parameter
+    })
+
+    it('Should save timestamp data into database with timezone time', async () => {
+        mockInsertTimestamp.mockClear()
+
+        const date_param = 'Sun, 13 Mar 2022 17:10:07 GMT'
+        const date_obj = new Date(date_param)
+        const used_timezone = '+00:00'
+        const aplicated_timezone = '+03:00'
+
+        database.insertTimestampAplTzTime(date_obj, used_timezone, aplicated_timezone, mockInsertTimestamp)
+
+        const expected_used_timezone_query = {
+            connectOrCreate: {
+                where: {
+                    name: 'etc/gmt' + used_timezone
+                },
+                create: {
+                    name: 'etc/gmt' + used_timezone,
+                    utc_offset: used_timezone
+                }
+        }
+        }
+        const expected_aplicated_timezone_query = {
+            connectOrCreate: {
+                where: {
+                    name: 'etc/gmt' + aplicated_timezone
+                },
+                create: {
+                    name: 'etc/gmt' + aplicated_timezone,
+                    utc_offset: aplicated_timezone
+                }
+            }
+        }
+
+        expect(mockInsertTimestamp.mock.calls).toHaveLength(1)                                   // check mockInsertTimestamp was called once
+        expect(mockInsertTimestamp.mock.calls[0][0].toUTCString()).toBe(date_param)              // check date parameter
+        expect(mockInsertTimestamp.mock.calls[0][1]).toEqual(expected_used_timezone_query)       // check used_timezone parameter
+        expect(mockInsertTimestamp.mock.calls[0][2]).toEqual(expected_aplicated_timezone_query)  // check aplicated_timezone parameter
+    })
+})
 
 describe('Test routes', () => {
     const app = new App({

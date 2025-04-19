@@ -22,20 +22,32 @@ const insertTimestamp = async (date_obj, used_timezone_query, aplicated_timezone
     }
 }
 
-// create querys and insert into timestamp table in database with aplicated timezone name
-const insertTimestampAplTzName = async (date_obj, used_timezone, aplicated_timezone) => {
+// create foreign key query for used_timezone
+const getUsedTzQuery = (used_timezone) => {
     // used_timezone foreign key
-    const used_timezone_query = {
+    const used_timezone_name = 'etc/gmt' + used_timezone
+    return {
         connectOrCreate: {
-            where:{
-                name: 'etc/gmt' + used_timezone
+            where: {
+                name: used_timezone_name
             },
             create: {
-                name: 'etc/gmt' + used_timezone,
+                name: used_timezone_name,
                 utc_offset: used_timezone
             }
         }
     }
+}
+
+// create querys and insert into timestamp table in database with aplicated timezone name
+const insertTimestampAplTzName = async (
+    date_obj, 
+    used_timezone, 
+    aplicated_timezone,
+    insertTimestampHandler = insertTimestamp // used for testing
+) => {
+    // used_timezone foreign key
+    const used_timezone_query = getUsedTzQuery(used_timezone)
 
     // aplicated_timezone foreign key
     const aplicated_timezone_query = {
@@ -45,11 +57,16 @@ const insertTimestampAplTzName = async (date_obj, used_timezone, aplicated_timez
     }
 
     // register timestamp
-    await insertTimestamp(date_obj, used_timezone_query, aplicated_timezone_query)
+    await insertTimestampHandler(date_obj, used_timezone_query, aplicated_timezone_query)
 }
 
 // create querys and insert into timestamp table in database with aplicated timezone time
-const insertTimestampAplTzTime = async (date_obj, used_timezone, aplicated_timezone) => {
+const insertTimestampAplTzTime = async (
+    date_obj, 
+    used_timezone, 
+    aplicated_timezone,
+    insertTimestampHandler = insertTimestamp // used for testing
+) => {
     // aplicated_timezone foreign key
     const aplicated_timezone_offset = aplicated_timezone ? aplicated_timezone : '+00:00'
     const aplicated_timezone_name = 'etc/gmt' + aplicated_timezone_offset
@@ -65,22 +82,10 @@ const insertTimestampAplTzTime = async (date_obj, used_timezone, aplicated_timez
         }
     }
 
-    // used_timezone foreign key
-    const used_timezone_name = 'etc/gmt' + used_timezone
-    const used_timezone_query = {
-        connectOrCreate: {
-            where: {
-                name: used_timezone_name
-            },
-            create: {
-                name: used_timezone_name,
-                utc_offset: used_timezone
-            }
-        }
-    }
+    const used_timezone_query = getUsedTzQuery(used_timezone)
     
     // register timestamp
-    await insertTimestamp(date_obj, used_timezone_query, aplicated_timezone_query)
+    await insertTimestampHandler(date_obj, used_timezone_query, aplicated_timezone_query)
 }
 
 // select timezone offset from database by timezone name
