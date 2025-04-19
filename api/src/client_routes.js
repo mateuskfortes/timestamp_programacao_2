@@ -21,15 +21,15 @@ export const getMainPage = (req, res) => res.sendFile(path.join(__dirname, 'temp
 export const getTimestampRoute = (db) => {
 
     // verify if the time matches the timezone offset format
-    const isName = (time) => {
-        if (time) return !/^[+-]\d{1,2}(:\d{0,2})?$/.test((time))
+    const isTime = (time) => {
+        if (time) return !!/^[+-]\d{1,2}(:\d{0,2})?$/.test((time))
         return false
     }
 
+
+    // format the timezone to the correct format: +00:00
+    // returns +00:00 if timezone was not provided
     const formatTimezone = (timezone, toSearch=false) => {
-        /*
-        Formata o fuso horário para o formato correto => +00:00
-        */
         if (timezone) {
             timezone = timezone?.trim().replace(',', ':').replace(/(?<=[+-])(?=\d(?=:|$))/, '0').replace(/:$/, ':00').replace(/(?<=[+-]\d{2}$)/, ':00')
             if (!toSearch) return timezone.replace(/:(\d)$/, ':$1' + '0')
@@ -65,7 +65,17 @@ export const getTimestampRoute = (db) => {
         // sets utc_offset
         // If timezone is a name, get the timezone offset from the database; otherwise, use the provided timezone
         let utc_offset
-        if (isName(aplicated_timezone)) {
+        if (!aplicated_timezone) {
+            utc_offset = formatTimezone()
+            await db.insertTimestampWithoutAplTz(date_obj_without_tz, used_timezone)
+        }
+        else if (isTime(aplicated_timezone)) {
+            utc_offset = formatTimezone(aplicated_timezone)
+            
+            // register timestamp into database
+            await db.insertTimestampAplTzTime(date_obj_without_tz, used_timezone, utc_offset)
+        }
+        else {
             // register timestamp into database
             utc_offset = await db.selectUtcOffset(aplicated_timezone)
             
@@ -73,14 +83,6 @@ export const getTimestampRoute = (db) => {
             if (!utc_offset) return res.json({ error: "Invalid timezone_name" })
             
             await db.insertTimestampAplTzName(date_obj_without_tz, used_timezone, aplicated_timezone)
-            
-        }
-        else {
-            const aplicated_timezone_offset = formatTimezone(aplicated_timezone)
-            
-            // register timestamp into database
-            await db.insertTimestampAplTzTime(date_obj_without_tz, used_timezone, aplicated_timezone_offset)
-            utc_offset = formatTimezone(aplicated_timezone_offset)
         }
     
         // Clone date object to avoid applying timezone

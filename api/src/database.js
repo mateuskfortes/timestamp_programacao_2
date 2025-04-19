@@ -88,6 +88,30 @@ const insertTimestampAplTzTime = async (
     await insertTimestampHandler(date_obj, used_timezone_query, aplicated_timezone_query)
 }
 
+const insertTimestampWithoutAplTz = async (
+    date_obj,
+    used_timezone,
+    insertTimestampHandler = insertTimestamp // used for testing
+) => {
+    const used_timezone_query = getUsedTzQuery(used_timezone)
+    
+    const aplicated_timezone_offset = '+00:00'
+    const aplicated_timezone_name = 'etc/gmt' + aplicated_timezone_offset
+    const aplicated_timezone_query = {
+        connectOrCreate: {
+            where: {
+                name: aplicated_timezone_name
+            },
+            create: {
+                name: aplicated_timezone_name,
+                utc_offset: aplicated_timezone_offset
+            }
+        }
+    }
+
+    await insertTimestampHandler(date_obj, used_timezone_query, aplicated_timezone_query)
+}
+
 // select timezone offset from database by timezone name
 const selectUtcOffset = async (timezone_name) => {
     const timezone_obj = await prisma.timezone.findFirst({
@@ -106,5 +130,6 @@ export default {
     insertTimestamp,
     insertTimestampAplTzName,
     insertTimestampAplTzTime,
+    insertTimestampWithoutAplTz,
     selectUtcOffset
 }

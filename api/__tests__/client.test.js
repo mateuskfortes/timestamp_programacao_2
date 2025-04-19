@@ -8,19 +8,24 @@ import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '@prisma/client'
 import moment from 'moment';
 import database from '../src/database.js'
+import { beforeEach, describe, it } from 'node:test';
 
 const prisma = new PrismaClient()
 
 const mockInsertTimestampAplTzTime = jest.fn()
 const mockInsertTimestampAplTzName = jest.fn()
+const mockInsertTimestampWithoutAplTz = jest.fn()
 const mockInsertTimestamp = jest.fn()
 
-const formatToParams = (param) => param.replace(' ', '%20')
+const formatToParams = (param) => param.replace(' ', '%20').replace('+', '%2B')
+
 
 describe("Function's tests", () => {
-    it('Should save timestamp data into database with timezone name', async () => {
-        mockInsertTimestamp.mockClear()
+    beforeEach(() => {
+        jest.resetAllMocks()
+    })
 
+    it('Should save timestamp data into database with aplicated timezone name', async () => {
         const date_param = 'Sun, 13 Mar 2022 17:10:07 GMT'
         const date_obj = new Date(date_param)
         const used_timezone = '+00:00'
@@ -51,9 +56,7 @@ describe("Function's tests", () => {
         expect(mockInsertTimestamp.mock.calls[0][2]).toEqual(expected_aplicated_timezone_query)             // check aplicated_timezone parameter
     })
 
-    it('Should save timestamp data into database with timezone time', async () => {
-        mockInsertTimestamp.mockClear()
-
+    it('Should save timestamp data into database with aplicated timezone time', async () => {
         const date_param = 'Sun, 13 Mar 2022 17:10:07 GMT'
         const date_obj = new Date(date_param)
         const used_timezone = '+00:00'
@@ -89,6 +92,43 @@ describe("Function's tests", () => {
         expect(mockInsertTimestamp.mock.calls[0][1]).toEqual(expected_used_timezone_query)       // check used_timezone parameter
         expect(mockInsertTimestamp.mock.calls[0][2]).toEqual(expected_aplicated_timezone_query)  // check aplicated_timezone parameter
     })
+
+    it('Should save timestamp data into database without aplicated timezone', async () => {
+        const date_param = 'Sun, 13 Mar 2022 17:10:07 GMT'
+        const date_obj = new Date(date_param)
+        const used_timezone = '+02:00'
+        const aplicated_timezone = '+00:00'
+
+        database.insertTimestampWithoutAplTz(date_obj, used_timezone, mockInsertTimestamp)
+
+        const expected_used_timezone_query = {
+            connectOrCreate: {
+                where: {
+                    name: 'etc/gmt' + used_timezone
+                },
+                create: {
+                    name: 'etc/gmt' + used_timezone,
+                    utc_offset: used_timezone
+                }
+            }
+        }
+        const expected_aplicated_timezone_query = {
+            connectOrCreate: {
+                where: {
+                    name: 'etc/gmt' + aplicated_timezone
+                },
+                create: {
+                    name: 'etc/gmt' + aplicated_timezone,
+                    utc_offset: aplicated_timezone
+                }
+            }
+        }
+
+        expect(mockInsertTimestamp.mock.calls).toHaveLength(1)                                     // check mockInsertTimestamp was called once
+        expect(mockInsertTimestamp.mock.calls[0][0].toUTCString()).toBe(date_param)                // check date parameter
+        expect(mockInsertTimestamp.mock.calls[0][1]).toEqual(expected_used_timezone_query)         // check used_timezone parameter
+        expect(mockInsertTimestamp.mock.calls[0][2]).toEqual(expected_aplicated_timezone_query)    // check aplicated_timezone parameter
+    })
 })
 
 describe('Test routes', () => {
@@ -96,6 +136,7 @@ describe('Test routes', () => {
         ...database,
         insertTimestampAplTzTime: mockInsertTimestampAplTzTime,
         insertTimestampAplTzName: mockInsertTimestampAplTzName,
+        insertTimestampWithoutAplTz: mockInsertTimestampWithoutAplTz,
     }, true).app
 
     test('/ route', async () => {
@@ -108,6 +149,10 @@ describe('Test routes', () => {
     })
 
     describe('/api/ route', () => {
+        beforeEach(() => {
+            jest.resetAllMocks()
+        })
+
         let response
         let expectedResponse = {
             utc: 'Sun, 30 Mar 2025 19:13:57 GMT',
@@ -148,35 +193,29 @@ describe('Test routes', () => {
         })
 
         it('Should save date in database without used timezone and aplicated timezone', async () => {
-            mockInsertTimestampAplTzTime.mockClear()
-            
             const date_param = 'Sun, 30 Mar 2025 20:30:27 GMT'
 
             await request(app).get('/api/'+ formatToParams(date_param))
             
-            expect(mockInsertTimestampAplTzTime.mock.calls).toHaveLength(1)                        // check if the function was called just once
-            expect(mockInsertTimestampAplTzTime.mock.calls[0][0].toUTCString()).toBe(date_param)   // check if the function was called with the correct date object
-            expect(mockInsertTimestampAplTzTime.mock.calls[0][1]).toBe('+00:00')                   // check if the function was called with the correct used timezone
-            expect(mockInsertTimestampAplTzTime.mock.calls[0][2]).toBe('+00:00')                   // check if the function was called with the correct aplicated timezone
+            expect(mockInsertTimestampWithoutAplTz.mock.calls).toHaveLength(1)                        // check if the function was called just once
+            expect(mockInsertTimestampWithoutAplTz.mock.calls[0][0].toUTCString()).toBe(date_param)   // check if the function was called with the correct date object
+            expect(mockInsertTimestampWithoutAplTz.mock.calls[0][1]).toBe('+00:00')                   // check if the function was called with the correct aplicated timezone
         })
 
-        it('Should save date and used timezone in the database', async () => {
-            mockInsertTimestampAplTzTime.mockClear()
-
+        it('Should save date and used timezone in the database without aplicated timezone', async () => {
             const date_param = 'Sun, 30 Mar 2025 20:30:27 GMT+3'
             const raw_date = new Date(date_param).toUTCString()
+            const aplicated_timezone = '+04:00'
 
-            await request(app).get('/api/' + formatToParams(date_param))
+            await request(app).get('/api/' + formatToParams(date_param) + '?timezone=' + formatToParams(aplicated_timezone))
 
             expect(mockInsertTimestampAplTzTime.mock.calls).toHaveLength(1)                        // check if the function was called just once
             expect(mockInsertTimestampAplTzTime.mock.calls[0][0].toUTCString()).toBe(raw_date)     // check if the function was called with the correct date object
             expect(mockInsertTimestampAplTzTime.mock.calls[0][1]).toBe('+03:00')                   // check if the function was called with the correct used timezone
-            expect(mockInsertTimestampAplTzTime.mock.calls[0][2]).toBe('+00:00')                   // check if the function was called with the correct aplicated timezone
+            expect(mockInsertTimestampAplTzTime.mock.calls[0][2]).toBe(aplicated_timezone)                   // check if the function was called with the correct aplicated timezone
         })
 
-        it('Should save date and timezone in the database, by sending timezone name', async () => {
-            mockInsertTimestampAplTzName.mockClear()
-
+        it('Should save date and timezone in the database, by sending aplicated timezone name', async () => {
             const date_param = 'Sun, 30 Mar 2025 12:13:57 GMT+3'
             const raw_date = new Date(date_param).toUTCString()
             const aplicated_timezone_name = 'America/Belem'
@@ -188,6 +227,17 @@ describe('Test routes', () => {
             expect(mockInsertTimestampAplTzName.mock.calls[0][0].toUTCString()).toBe(raw_date)     // check if the function was called with the correct date object
             expect(mockInsertTimestampAplTzName.mock.calls[0][1]).toBe('+03:00')                   // check if the function was called with the correct used timezone
             expect(mockInsertTimestampAplTzName.mock.calls[0][2]).toBe(aplicated_timezone_name)   // check if the function was called with the correct aplicated timezone
+        })
+
+        it('Should save date and timezone in the database, by sending aplicated timezone time', async () => {
+            const raw_param = 'Sun, 30 Mar 2025 12:13:57 GMT'
+            const aplicated_timezone = '+06:00'
+
+            await request(app).get('/api/' + formatToParams(raw_param) + '?timezone=' + formatToParams(aplicated_timezone))
+            expect(mockInsertTimestampAplTzTime.mock.calls).toHaveLength(1)                       // check if the function was called just once
+            expect(mockInsertTimestampAplTzTime.mock.calls[0][0].toUTCString()).toBe(raw_param)   // check if the function was called with the correct date object
+            expect(mockInsertTimestampAplTzTime.mock.calls[0][1]).toBe('+00:00')                  // check if the function was called with the correct used timezone
+            expect(mockInsertTimestampAplTzTime.mock.calls[0][2]).toBe(aplicated_timezone)        // check if the function was called with the correct aplicated timezone
         })
 
         test('Send invalid data', async () => {
