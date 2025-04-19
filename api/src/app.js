@@ -1,5 +1,5 @@
 import express from 'express'
-import { getDate, getDateDiff, getMainPage, searchTimezone } from "./client_routes.js";
+import { getDateDiff, getTimestampRoute, getMainPage, searchTimezone } from "./client_routes.js";
 import cors from 'cors' 
 import dotenv from "dotenv";
 import { warn } from './utils/custom_logs.js'
@@ -8,7 +8,8 @@ import { ALLOWED_ORIGINS, PORT, ENABLE_CORS } from '../config.js'
 dotenv.config();
 
 class App {
-    constructor(warningBypass=false) {
+    constructor(database, warningBypass=false) {
+        this.database = database
         this.warningBypass = warningBypass
         this.app = express()
         this.config()
@@ -28,7 +29,7 @@ class App {
 
     routes() {
         this.app.get('/', getMainPage)
-        this.app.get('/api/:date?', getDate)
+        this.app.get('/api/:date?', getTimestampRoute(this.database))
         this.app.get('/api/diff/:date1/:date2', getDateDiff)
         this.app.get('/search_timezone/', searchTimezone)
     }

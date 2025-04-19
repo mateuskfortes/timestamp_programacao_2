@@ -6,11 +6,12 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '@prisma/client'
 import moment from 'moment';
+import database from '../src/database.js'
 
 const prisma = new PrismaClient()
 
 describe('Test routes', () => {
-    const app = new App(true).app
+    const app = new App(database, true).app
 
     test('/ route', async () => {
         const response = await request(app).get('/')
