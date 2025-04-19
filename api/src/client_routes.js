@@ -3,12 +3,18 @@ import path from 'path'
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '@prisma/client'
-import { connect } from "node:http2";
-
+import { error } from "./utils/custom_logs.js";
 const prisma = new PrismaClient()
 
 // pega a rota absoluta 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+
+// verify if the time matches the timezone offset format
+const isName = (time) => {
+    if (time) return !/^[+-]\d{1,2}(:\d{0,2})?$/.test((time))
+    return false
+}
 
 const formatTimezone = (timezone, toSearch=false) => {
     /*
@@ -21,137 +27,168 @@ const formatTimezone = (timezone, toSearch=false) => {
     }
     return '+00:00'
 }
-export const dateHandler = (time, timezone_string='0') => {
+
+// insert timestamp in database
+const insertTimestamp = async (date_obj, used_timezone_query, aplicated_timezone_query) => {
+    try {
+        await prisma.timestamp.create({
+            data: {
+                searched_at: new Date(),
+                date: {
+                    create: {
+                        date: date_obj,
+                        used_timezone: used_timezone_query,
+                        aplicated_timezone: aplicated_timezone_query
+                    }
+                }
+            }
+        })
+    } catch (e) {
+        error(e)
+    }
+}
+
+// create querys and insert into timestamp table in database with aplicated timezone name
+const insertTimestampTzName = async (date_obj, used_timezone, aplicated_timezone) => {
+    // used_timezone foreign key
+    const used_timezone_query = {
+        connectOrCreate: {
+            where:{
+                name: 'etc/gmt' + used_timezone
+            },
+            create: {
+                name: 'etc/gmt' + used_timezone,
+                utc_offset: used_timezone
+            }
+        }
+    }
+
+    // aplicated_timezone foreign key
+    const aplicated_timezone_query = {
+        connect: {
+            name: aplicated_timezone
+        }
+    }
+
+    // register timestamp
+    await insertTimestamp(date_obj, used_timezone_query, aplicated_timezone_query)
+}
+
+// create querys and insert into timestamp table in database with aplicated timezone time
+const insertTimestampTzTime = async (date_obj, used_timezone, aplicated_timezone) => {
+    // aplicated_timezone foreign key
+    const aplicated_timezone_offset = aplicated_timezone ? aplicated_timezone : '+00:00'
+    const aplicated_timezone_name = 'etc/gmt' + aplicated_timezone_offset
+    const aplicated_timezone_query = {
+        connectOrCreate: {
+            where: {
+                name: aplicated_timezone_name
+            },
+            create: {
+                name: aplicated_timezone_name,
+                utc_offset: aplicated_timezone_offset
+            }
+        }
+    }
+
+    // used_timezone foreign key
+    const used_timezone_name = 'etc/gmt' + used_timezone
+    const used_timezone_query = {
+        connectOrCreate: {
+            where: {
+                name: used_timezone_name
+            },
+            create: {
+                name: used_timezone_name,
+                utc_offset: used_timezone
+            }
+        }
+    }
+    
+    // register timestamp
+    await insertTimestamp(date_obj, used_timezone_query, aplicated_timezone_query)
+}
+
+// select timezone offset from database by timezone name
+const selectUtcOffset = async (timezone_name) => {
+    const timezone_obj = await prisma.timezone.findFirst({
+        where: {
+            name: timezone_name
+        },
+        select: {
+            utc_offset: true
+        }
+    })
+    if (timezone_obj) return timezone_obj.utc_offset
+}
+
+const createDateObj = (dateTime) => {
+    // se o parametro date não existir, utiza o tempo atual
+    if (!dateTime) return new Date()
+    
+    // se o parametro dateTime esteja em unix, converte para o tipo Number ao criar o objeto Date
+    return new Date(!isNaN(dateTime) ? Number(dateTime) : dateTime)
+}
+
+// apply timezone to a Date object
+export const applyTimezone = (date, timezone_string) => {
     const splited_timezone = timezone_string.trim().split(':')
     const hours = Number(splited_timezone[0])
     const minutes = Number(splited_timezone[1])
 
-    let date
-
-    // se o parametro date não existir, utiza o tempo atual
-    if (!time) date = new Date()
-
-    // Ao criar, converte a data para o tipo Number caso esteja em unix
-    else date = new Date(!isNaN(time) ? Number(time) : time)
-    
     // Ajusta o fuso horário
-    if (timezone_string != 0) date.setUTCHours(date.getUTCHours() + hours, date.getUTCMinutes() + minutes)
+    date.setUTCHours(date.getUTCHours() + hours, date.getUTCMinutes() + minutes)
     return date
 }
 
 export const getMainPage = (req, res) => res.sendFile(path.join(__dirname, 'templates', 'index.html'))
 
 export const getDate = async (req, res) => {
-    const tz_raw = req.query.timezone
-    const timezone_is_name = tz_raw ? !!!tz_raw?.match(/^[+-]\d{1,2}(:\d{0,2})?$/) : false
-
-    const timezone = timezone_is_name ? tz_raw : formatTimezone(tz_raw)
-
-    const date = req.params.date
+    const date_param = req.params.date
+    const aplicated_timezone = req.query.timezone
     
-    const {utc_offset} = timezone_is_name ? await prisma.timezone.findFirst({where: {name: timezone}, select: {utc_offset: true}}) || {utc_offset: 'error'} : {utc_offset:timezone}
-    if (utc_offset == 'error') return res.json({ error: "Invalid timezone_name" })
-    const raw_time = date ? new Date(!isNaN(date) ? Number(date) : date) : new Date()
-    const time = dateHandler(date, utc_offset)
+    // create date object without timezone
+    const date_obj_without_tz = createDateObj(date_param)
+
+    if(isNaN(date_obj_without_tz.getTime())) return res.json({ error: "Invalid Date" })
     
-    const raw_used_timezone = date?.match(/(?<=GMT)[+-]\d{1,2}(:\d{0,2})?$/)
+    // get used timezone from date parameter and format it
+    const raw_used_timezone = date_param?.match(/(?<=GMT)[+-]\d{1,2}(:\d{0,2})?$/)
     const used_timezone = formatTimezone(raw_used_timezone ? raw_used_timezone[0]: undefined)
     
-    // transforma o tempo em utc e unix
-    const unix = time.getTime()
-    const utc = time.toUTCString() + (timezone && !timezone.includes('00:00') ? ` ${timezone}` : '')
-
+    // sets utc_offset
+    // If timezone is a name, get the timezone offset from the database; otherwise, use the provided timezone
+    let utc_offset
+    if (isName(aplicated_timezone)) {
+        // register timestamp into database
+        await insertTimestampTzName(date_obj_without_tz, used_timezone, aplicated_timezone)
+        utc_offset = await selectUtcOffset(aplicated_timezone)
     
-    // retorna erro caso a data seja inválida
-    if (isNaN(unix) || isNaN(raw_time.getTime())) return res.json({ error: "Invalid Date" })
-
-    if (timezone_is_name) {
-        try {
-            await prisma.timestamp.create({
-                data: {
-                    searched_at: new Date(),
-                    date: {
-                        create: {
-                                date: raw_time,
-                                used_timezone: {
-                                    connectOrCreate: {
-                                        where:{
-                                            name: 'etc/gmt' + used_timezone
-                                        },
-                                        create: {
-                                            name: 'etc/gmt' + used_timezone,
-                                            utc_offset: used_timezone
-                                        }
-                                    }
-                                },
-                                aplicated_timezone : {
-                                    connect: {
-                                        name: timezone
-                                    }
-                                }
-                            
-                        }
-                    }
-                }
-            })
-        } catch (error) {
-            return res.json({ error: "Invalid timezone_name" + error })
-        }
-    } else {
-        const aplicated_timezone_query = timezone ? {
-            connectOrCreate: {
-                where: {
-                    name: 'etc/gmt' + timezone
-                },
-                create: {
-                    name: 'etc/gmt' + timezone,
-                    utc_offset: timezone
-                }
-            }
-        } : {
-            connectOrCreate: {
-                where: {
-                    name: 'etc/gmt+00:00'
-                },
-                create: {
-                    name: 'etc/gmt+00:00',
-                    utc_offset: '+00:00'
-                }
-            }
-        }
-    
-        await prisma.timestamp.create({
-            data: {
-                searched_at: new Date(),
-                date: {
-                    create: {
-                        date: raw_time,
-                        used_timezone: {
-                            connectOrCreate: {
-                                where:{
-                                    name: 'etc/gmt' + used_timezone
-                                },
-                                create: {
-                                    name: 'etc/gmt' + used_timezone,
-                                    utc_offset: used_timezone
-                                }
-                            }
-                        },
-                        aplicated_timezone : aplicated_timezone_query
-                    }
-                }
-            }
-        })
+        // returns error message if timezone was not found in database
+        if (!utc_offset) return res.json({ error: "Invalid timezone_name" })
+    }
+    else {
+        const aplicated_timezone_offset = formatTimezone(aplicated_timezone)
+        
+        // register timestamp into database
+        await insertTimestampTzTime(date_obj_without_tz, used_timezone, aplicated_timezone_offset)
+        utc_offset = formatTimezone(aplicated_timezone_offset)
     }
 
+    // Clone date object to avoid applying timezone
+    const date_obj_with_tz = applyTimezone(structuredClone(date_obj_without_tz), utc_offset)
+    
+    // transforma o tempo em utc e unix
+    const unix = date_obj_with_tz.getTime()
+    const utc = date_obj_with_tz.toUTCString() + (utc_offset && !utc_offset.includes('00:00') ? ` ${utc_offset}` : '')
 
     res.json({ unix, utc })
 }
  
 // retorna a diferença entre as datas
 export const getDateDiff = (req, res) => {
-    const starts = moment(dateHandler(req.params.date1))
-    const ends = moment(dateHandler(req.params.date2))
+    const starts = moment(createDateObj(req.params.date1))
+    const ends = moment(createDateObj(req.params.date2))
 
     // calcula a diferença em dias, horas, minutos e segundos
     const days = ends.diff(starts, 'days');

@@ -1,28 +1,13 @@
 import request from 'supertest'
 import App from '../src/app'
-import { dateHandler } from '../src/client_routes.js'
 import fs from "fs";
 import path from "path";
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '@prisma/client'
+import moment from 'moment';
 
 const prisma = new PrismaClient()
-
-describe('Test functions', () => {
-    test('Date object creation with Unix time', () => {
-        expect(dateHandler('111')).toEqual(new Date(111))
-    })
-    test('Date object creation with Utc time', () => {
-        expect(dateHandler('Sun, 30 Mar 2025 18:02:50 GMT')).toEqual(new Date('Sun, 30 Mar 2025 18:02:50 GMT'))
-    })
-
-    test('Date object creation with timezone', () => {
-        const date = new Date('Sun, 30 Mar 2025 15:02:50 GMT -3')
-        date.setUTCHours(date.getUTCHours() + (-3))
-        expect(dateHandler('Sun, 30 Mar 2025 18:02:50 GMT', '-03:00')).toEqual(date)
-    })
-})
 
 describe('Test routes', () => {
     const app = new App(true).app
@@ -63,20 +48,16 @@ describe('Test routes', () => {
         })
 
         test('Send without data', async () => {
-            // Ignora o último segundo do tempo
-            function bypassSecond(obj) {
-                const unix = Math.floor(obj.unix / 10000) * 10000
-                const utc = obj.utc.replace(/\d{1}\sGMT/, '0 GMT');
-                return { unix, utc };
-            }
-
             const date = new Date()
-            const expectedResponse = {
-                unix: date.getTime(),
-                utc: date.toUTCString()
-            }
             response = await request(app).get('/api/')
-            expect(bypassSecond(response.body)).toEqual(bypassSecond(expectedResponse))
+
+            const expected_moment = moment(date)
+            const received_moment_utc = moment(response.body.utc)
+            const received_moment_unix = moment(response.body.unix)
+            
+            // O teste pode falhar se o tempo de resposta do endpoint for igual ou maior que 1 segundo.
+            expect(received_moment_utc.diff(expected_moment, 'seconds')).toBe(0)
+            expect(received_moment_unix.diff(expected_moment, 'seconds')).toBe(0)
 
         })
 
