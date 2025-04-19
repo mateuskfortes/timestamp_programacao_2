@@ -72,14 +72,14 @@ export const getTimestampRoute = (db) => {
             // returns error message if timezone was not found in database
             if (!utc_offset) return res.json({ error: "Invalid timezone_name" })
             
-            await db.insertTimestampTzName(date_obj_without_tz, used_timezone, aplicated_timezone)
+            await db.insertTimestampAplTzName(date_obj_without_tz, used_timezone, aplicated_timezone)
             
         }
         else {
             const aplicated_timezone_offset = formatTimezone(aplicated_timezone)
             
             // register timestamp into database
-            await db.insertTimestampTzTime(date_obj_without_tz, used_timezone, aplicated_timezone_offset)
+            await db.insertTimestampAplTzTime(date_obj_without_tz, used_timezone, aplicated_timezone_offset)
             utc_offset = formatTimezone(aplicated_timezone_offset)
         }
     

@@ -8,20 +8,19 @@ import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '@prisma/client'
 import moment from 'moment';
 import database from '../src/database.js'
-import { mock } from 'node:test';
 
 const prisma = new PrismaClient()
 
-const mockInsertTimestampTzTime = jest.fn()
-const mockInsertTimestampTzName = jest.fn()
+const mockInsertTimestampAplTzTime = jest.fn()
+const mockInsertTimestampAplTzName = jest.fn()
 
 const formatToParams = (param) => param.replace(' ', '%20')
 
 describe('Test routes', () => {
     const app = new App({
         ...database,
-        insertTimestampTzTime: mockInsertTimestampTzTime,
-        insertTimestampTzName: mockInsertTimestampTzName,
+        insertTimestampAplTzTime: mockInsertTimestampAplTzTime,
+        insertTimestampAplTzName: mockInsertTimestampAplTzName,
     }, true).app
 
     test('/ route', async () => {
@@ -74,34 +73,34 @@ describe('Test routes', () => {
         })
 
         it('Should save date in database without used timezone and aplicated timezone', async () => {
-            mockInsertTimestampTzTime.mockClear()
+            mockInsertTimestampAplTzTime.mockClear()
             
             const date_param = 'Sun, 30 Mar 2025 20:30:27 GMT'
 
             await request(app).get('/api/'+ formatToParams(date_param))
             
-            expect(mockInsertTimestampTzTime.mock.calls).toHaveLength(1)                        // check if the function was called just once
-            expect(mockInsertTimestampTzTime.mock.calls[0][0].toUTCString()).toBe(date_param)   // check if the function was called with the correct date object
-            expect(mockInsertTimestampTzTime.mock.calls[0][1]).toBe('+00:00')                   // check if the function was called with the correct used timezone
-            expect(mockInsertTimestampTzTime.mock.calls[0][2]).toBe('+00:00')                   // check if the function was called with the correct aplicated timezone
+            expect(mockInsertTimestampAplTzTime.mock.calls).toHaveLength(1)                        // check if the function was called just once
+            expect(mockInsertTimestampAplTzTime.mock.calls[0][0].toUTCString()).toBe(date_param)   // check if the function was called with the correct date object
+            expect(mockInsertTimestampAplTzTime.mock.calls[0][1]).toBe('+00:00')                   // check if the function was called with the correct used timezone
+            expect(mockInsertTimestampAplTzTime.mock.calls[0][2]).toBe('+00:00')                   // check if the function was called with the correct aplicated timezone
         })
 
         it('Should save date and used timezone in the database', async () => {
-            mockInsertTimestampTzTime.mockClear()
+            mockInsertTimestampAplTzTime.mockClear()
 
             const date_param = 'Sun, 30 Mar 2025 20:30:27 GMT+3'
             const raw_date = new Date(date_param).toUTCString()
 
             await request(app).get('/api/' + formatToParams(date_param))
 
-            expect(mockInsertTimestampTzTime.mock.calls).toHaveLength(1)                        // check if the function was called just once
-            expect(mockInsertTimestampTzTime.mock.calls[0][0].toUTCString()).toBe(raw_date)     // check if the function was called with the correct date object
-            expect(mockInsertTimestampTzTime.mock.calls[0][1]).toBe('+03:00')                   // check if the function was called with the correct used timezone
-            expect(mockInsertTimestampTzTime.mock.calls[0][2]).toBe('+00:00')                   // check if the function was called with the correct aplicated timezone
+            expect(mockInsertTimestampAplTzTime.mock.calls).toHaveLength(1)                        // check if the function was called just once
+            expect(mockInsertTimestampAplTzTime.mock.calls[0][0].toUTCString()).toBe(raw_date)     // check if the function was called with the correct date object
+            expect(mockInsertTimestampAplTzTime.mock.calls[0][1]).toBe('+03:00')                   // check if the function was called with the correct used timezone
+            expect(mockInsertTimestampAplTzTime.mock.calls[0][2]).toBe('+00:00')                   // check if the function was called with the correct aplicated timezone
         })
 
         it('Should save date and timezone in the database, by sending timezone name', async () => {
-            mockInsertTimestampTzName.mockClear()
+            mockInsertTimestampAplTzName.mockClear()
 
             const date_param = 'Sun, 30 Mar 2025 12:13:57 GMT+3'
             const raw_date = new Date(date_param).toUTCString()
@@ -110,10 +109,10 @@ describe('Test routes', () => {
             const response = await request(app).get('/api/' + formatToParams(date_param) + '?timezone=' + aplicated_timezone_name)
             
             expect(response.body).not.toEqual({ error: "Invalid timezone_name" })
-            expect(mockInsertTimestampTzName.mock.calls).toHaveLength(1)                        // check if the function was called just once
-            expect(mockInsertTimestampTzName.mock.calls[0][0].toUTCString()).toBe(raw_date)     // check if the function was called with the correct date object
-            expect(mockInsertTimestampTzName.mock.calls[0][1]).toBe('+03:00')                   // check if the function was called with the correct used timezone
-            expect(mockInsertTimestampTzName.mock.calls[0][2]).toBe(aplicated_timezone_name)   // check if the function was called with the correct aplicated timezone
+            expect(mockInsertTimestampAplTzName.mock.calls).toHaveLength(1)                        // check if the function was called just once
+            expect(mockInsertTimestampAplTzName.mock.calls[0][0].toUTCString()).toBe(raw_date)     // check if the function was called with the correct date object
+            expect(mockInsertTimestampAplTzName.mock.calls[0][1]).toBe('+03:00')                   // check if the function was called with the correct used timezone
+            expect(mockInsertTimestampAplTzName.mock.calls[0][2]).toBe(aplicated_timezone_name)   // check if the function was called with the correct aplicated timezone
         })
 
         test('Send invalid data', async () => {

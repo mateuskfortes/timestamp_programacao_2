@@ -23,7 +23,7 @@ const insertTimestamp = async (date_obj, used_timezone_query, aplicated_timezone
 }
 
 // create querys and insert into timestamp table in database with aplicated timezone name
-const insertTimestampTzName = async (date_obj, used_timezone, aplicated_timezone) => {
+const insertTimestampAplTzName = async (date_obj, used_timezone, aplicated_timezone) => {
     // used_timezone foreign key
     const used_timezone_query = {
         connectOrCreate: {
@@ -49,7 +49,7 @@ const insertTimestampTzName = async (date_obj, used_timezone, aplicated_timezone
 }
 
 // create querys and insert into timestamp table in database with aplicated timezone time
-const insertTimestampTzTime = async (date_obj, used_timezone, aplicated_timezone) => {
+const insertTimestampAplTzTime = async (date_obj, used_timezone, aplicated_timezone) => {
     // aplicated_timezone foreign key
     const aplicated_timezone_offset = aplicated_timezone ? aplicated_timezone : '+00:00'
     const aplicated_timezone_name = 'etc/gmt' + aplicated_timezone_offset
@@ -99,7 +99,7 @@ const selectUtcOffset = async (timezone_name) => {
 
 export default {
     insertTimestamp,
-    insertTimestampTzName,
-    insertTimestampTzTime,
+    insertTimestampAplTzName,
+    insertTimestampAplTzTime,
     selectUtcOffset
 }
