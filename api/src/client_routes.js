@@ -59,7 +59,7 @@ export const getTimestampRoute = (db) => {
         if(isNaN(date_obj_without_tz.getTime())) return res.json({ error: "Invalid Date" })
         
         // get used timezone from date parameter and format it
-        const raw_used_timezone = date_param?.match(/(?<=GMT)[+-]\d{1,2}(:\d{0,2})?$/)
+        const raw_used_timezone = date_param?.match(/(?<=GMT)\s{0,}[+-]\d{1,2}(:\d{0,2})?$/)
         const used_timezone = formatTimezone(raw_used_timezone ? raw_used_timezone[0]: undefined)
         
         // sets utc_offset
