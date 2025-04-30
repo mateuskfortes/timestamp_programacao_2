@@ -16,6 +16,23 @@ const createDateObj = (dateTime) => {
     return new Date(!isNaN(dateTime) ? Number(dateTime) : dateTime)
 }
 
+// format the timezone to the correct format: +00:00
+// returns +00:00 if timezone was not provided
+const formatTimezone = (timezone, toSearch=false) => {
+    if (timezone) {
+        timezone = timezone?.trim().replace(',', ':').replace(/(?<=[+-])(?=\d(?=:|$))/, '0').replace(/:$/, ':00').replace(/(?<=[+-]\d{2}$)/, ':00')
+        if (!toSearch) return timezone.replace(/:(\d)$/, ':$1' + '0')
+        return timezone
+    }
+    return '+00:00'
+}
+
+// returns the used timezone from raw date
+const getUsedTimezone = (raw_date) => {
+    const raw_used_timezone = raw_date?.match(/(?<=GMT)\s{0,}[+-]\d{1,2}(:\d{0,2})?$/)
+    return formatTimezone(raw_used_timezone ? raw_used_timezone[0]: undefined)
+}
+
 export const getMainPage = (req, res) => res.sendFile(path.join(__dirname, 'templates', 'index.html'))
 
 export const getTimestampRoute = (db) => {
@@ -26,17 +43,6 @@ export const getTimestampRoute = (db) => {
         return false
     }
 
-
-    // format the timezone to the correct format: +00:00
-    // returns +00:00 if timezone was not provided
-    const formatTimezone = (timezone, toSearch=false) => {
-        if (timezone) {
-            timezone = timezone?.trim().replace(',', ':').replace(/(?<=[+-])(?=\d(?=:|$))/, '0').replace(/:$/, ':00').replace(/(?<=[+-]\d{2}$)/, ':00')
-            if (!toSearch) return timezone.replace(/:(\d)$/, ':$1' + '0')
-            return timezone
-        }
-        return '+00:00'
-    }
     
     // apply timezone to a Date object
     const applyTimezone = (date, timezone_string) => {
@@ -59,8 +65,8 @@ export const getTimestampRoute = (db) => {
         if(isNaN(date_obj_without_tz.getTime())) return res.json({ error: "Invalid Date" })
         
         // get used timezone from date parameter and format it
-        const raw_used_timezone = date_param?.match(/(?<=GMT)\s{0,}[+-]\d{1,2}(:\d{0,2})?$/)
-        const used_timezone = formatTimezone(raw_used_timezone ? raw_used_timezone[0]: undefined)
+        
+        const used_timezone = getUsedTimezone(date_param)
         
         // sets utc_offset
         // If timezone is a name, get the timezone offset from the database; otherwise, use the provided timezone
