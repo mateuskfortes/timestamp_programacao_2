@@ -24,8 +24,8 @@ model date {
   used_timezone_id         Int
 
   // timezone that will be applied to the date
-  aplicated_timezone       timezone    @relation("aplicated_timezone",fields: [aplicated_timezone_id], references: [id])
-  aplicated_timezone_id    Int
+  aplicated_timezone       timezone?    @relation("aplicated_timezone",fields: [aplicated_timezone_id], references: [id])
+  aplicated_timezone_id    Int?
 
   timestamp                timestamp[]
 

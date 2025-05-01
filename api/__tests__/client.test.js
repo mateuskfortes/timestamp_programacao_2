@@ -212,7 +212,7 @@ describe('Test routes', () => {
             expect(mockInsertTimestampAplTzTime.mock.calls).toHaveLength(1)                        // check if the function was called just once
             expect(mockInsertTimestampAplTzTime.mock.calls[0][0].toUTCString()).toBe(raw_date)     // check if the function was called with the correct date object
             expect(mockInsertTimestampAplTzTime.mock.calls[0][1]).toBe('+03:00')                   // check if the function was called with the correct used timezone
-            expect(mockInsertTimestampAplTzTime.mock.calls[0][2]).toBe(aplicated_timezone)                   // check if the function was called with the correct aplicated timezone
+            expect(mockInsertTimestampAplTzTime.mock.calls[0][2]).toBe(aplicated_timezone)         // check if the function was called with the correct aplicated timezone
         })
 
         it('Should save date and timezone in the database, by sending aplicated timezone name', async () => {
